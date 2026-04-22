@@ -1,0 +1,55 @@
+<!Doctype>
+<html>
+    <head>
+        <title>Admin Dashboard</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminDashBoard.css') }}">
+    </head>
+    <body>
+        <div class="DashBoard-container">
+            <h2>Welcome To AdminDashboard</h2>
+            <div class ="dashboard-summary-filter">
+                <button type="button" class="btn-view-tickets" onclick="window.location.href='/view-tickets'">
+                   show summary of tickets
+                </button>
+                <button type ="button" class="btn-filter-tickets" onclick="window.location.href='/filter-tickets'">
+                    Filter tickets  
+                </button>
+            </div>
+
+            <div class="Ticket-table">
+                <table class="ticket-table">
+                    <thead>
+                        <tr>
+
+                            <th>Serial Number</th>
+                            <th>Employee_Name</th>
+                            <th>Email</th>
+                            <th>Ticket Id</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ ticket.employee_name }}</td>
+                            <td>{{ ticket.email }}</td>
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.title }}</td>
+                            <td>{{ ticket.description }}</td>
+                            <td>{{ ticket.category }}</td>
+                            <td>{{ ticket.priority }}</td>
+                            <td><span class="status-{{ ticket.status }}">{{ ticket.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </body>
+</html>

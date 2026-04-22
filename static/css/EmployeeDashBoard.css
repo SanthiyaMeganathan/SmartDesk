@@ -1,0 +1,7 @@
+body { font-family: Arial, sans-serif; background-color: #0d7187; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; }
+.btn-raise-ticket { background-color: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+.ticket-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+.ticket-table th, .ticket-table td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+.ticket-table th { background-color: #f8f9fa; }
+.ticket-table tr:hover { background-color: #f1f1f1; }

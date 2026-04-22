@@ -166,7 +166,7 @@ def raise_ticket():
 
 def chatbot():
     
-    #here we need to implement the rag model and then we will pass the user query to the rag model and get the response from the rag model and then we will return that response to the user in the chatbot page
+    #here we need to implement the rag model and then we will pass the user query to the rag model and get the response from the rag model and then we will return that response to the user in the chatbot page012.20.sy
     
     data=request.get_json()
     user_query=data.get('user_query')
