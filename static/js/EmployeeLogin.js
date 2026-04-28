@@ -1,19 +1,21 @@
-const loginForm = document.querySelector('.login-container form');
-loginForm.addEventListener('submit', function(event) {
-    event.preventDefault(); 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-
-    if (username === 'employee' && password === 'password') {
-        alert('Login successful!');
-      
-    } else {
-        alert('Invalid username or password. Please try again.');
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. The Button Redirect Logic
+    const moveToAdminLogin = document.getElementById('moveToAdminLogin');
+    // We add an 'if' check just to make sure the button actually exists on the page
+    if (moveToAdminLogin) {
+        moveToAdminLogin.addEventListener('click', function() {
+            window.location.href = '/admin-login'; 
+        });
     }
-});
 
-
-const moveToAdminLogin = document.getElementById('moveToAdminLogin');
-moveToAdminLogin.addEventListener('click', function() {
-    window.location.href = 'AdminLogin.html'; // Redirect to Admin Login page
+    // 2. The Error Vanishing Spell
+    const flashMsg = document.querySelectorAll('.error-flash');
+    if(flashMsg.length > 0){
+        setTimeout(function() {
+            flashMsg.forEach(function(msg) {
+                msg.style.display = 'none';
+            });
+        }, 3000); 
+    }      
 });

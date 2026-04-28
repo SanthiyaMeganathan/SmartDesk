@@ -7,13 +7,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminLogin.css') }}">
 </head>
 <body>
+    <h1>Welcome to Admin Login</h1>
     <div class="login-container">
         <h2>Admin Login</h2>
-        <form action="/admin/login" method="post">
-            <div class="form-group
-">
-                <label for="email">Email</label>
-                <input type="text" id="email" name="email" required>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="error-flash">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('admin_login') }}" method="POST">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
@@ -22,7 +33,7 @@
             <button type="submit">Login</button>
         </form>
     </div>
+    </div> <script src="{{ url_for('static', filename='js/AdminLogin.js') }}"></script>
+
 </body>
-
-
 </html>

@@ -37,7 +37,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for ticket in tickets %}
+                        {%- for ticket in tickets -%}
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>{{ ticket.id }}</td>
@@ -47,7 +47,7 @@
                             <td>{{ ticket.priority }}</td>
                             <td><span class="status-{{ ticket.status }}">{{ ticket.status }}</span></td>
                         </tr>
-                        {% endfor %}
+                        {%- endfor -%}
                     </tbody>
                 </table>
             </div>

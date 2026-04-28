@@ -7,17 +7,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/EmployeeLogin.css') }}">
 </head>
 <body>
+    <h1>Welcome to SmartDesk</h1>
+    
     <div class="login-container">
         <h2>Employee Login</h2>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="error-flash">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
         
-        <form action="/employee/login" method="post">
-            <a href="{{ url_for('AdminLogin') }}">
-            <button type="button">Admin Login</button>
-            </a>
+        <form action="{{ url_for('employee_login') }}" method="POST">
+            <button type="button" id="moveToAdminLogin" class="adminlogin">
+             Admin Login
+           </button>
 
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="text" id="email" name="email" required>    
+                <label for="email">Email:</label> 
+                <input type="email" id="email" name="email" required>    
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
@@ -26,6 +38,7 @@
             <button type="submit">Login</button>
         </form>
     </div>
-</body>
 
+    <script src="{{ url_for('static', filename='js/employeelogin.js') }}"></script>
+</body>
 </html>
