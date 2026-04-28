@@ -20,9 +20,7 @@
                 <table class="ticket-table">
                     <thead>
                         <tr>
-
                             <th>Serial Number</th>
-                            <th>Employee_Name</th>
                             <th>Email</th>
                             <th>Ticket Id</th>
                             <th>Title</th>
@@ -36,7 +34,6 @@
                         {% for ticket in tickets %}
                         <tr>
                             <td>{{ loop.index }}</td>
-                            <td>{{ ticket.employee_name }}</td>
                             <td>{{ ticket.email }}</td>
                             <td>{{ ticket.id }}</td>
                             <td>{{ ticket.title }}</td>
@@ -48,7 +45,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
-
             </div>
         </div>
     </body>

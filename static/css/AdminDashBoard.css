@@ -1,4 +1,3 @@
-
 body {
     background-color: #7184f2;
     font-family: Arial, sans-serif;
@@ -8,13 +7,11 @@ body {
     padding: 20px;
 }
 
-
 .Ticket-table { 
     height: auto; 
     margin-top: 20px;
     clear: both; 
 }
-
 
 .ticket-table {
     width: 100%;
@@ -36,7 +33,6 @@ body {
     background-color: #f2f2f2;
 }
 
-
 .btn-view-tickets {
     background-color: #F0FFC2;
     color: black;
@@ -53,7 +49,6 @@ body {
     font-size: 16px;
     float: right;
 }
-
 
 .btn-filter-tickets {
     background-color: #B5E18B;

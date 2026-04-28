@@ -14,6 +14,10 @@ create table Admin_loginDetails(
     password varchar(255) not null
 )
 
+..........................completed the database tables for employee login details and admin login details and now we will move to the next step that is creating the routes for employee login and admin login in the flask application.
+
+
+
 @app.route('/employee/login', methods=['POST'])
 def employee_login():
     data = request.get_json()
