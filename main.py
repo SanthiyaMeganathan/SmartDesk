@@ -6,10 +6,12 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import chromadb
 from chromadb.utils import embedding_functions
+import json
+import re
+
 
 app = Flask(__name__)
 app.secret_key = 'my_secret_key'
-
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///smartdesk.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -17,24 +19,16 @@ db = SQLAlchemy(app)
 
 OLLAMA_BASE_URL = "http://localhost:11434"
 
-#emp model
 
 class Employee_loginDetails(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(150), nullable=False)
-    
- 
 
-#admin model    
-    
 class Admin_loginDetails(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(150), nullable=False)
-    
-
-#Ticket model to Raise ticket.    
     
 class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,22 +39,18 @@ class Ticket(db.Model):
     priority = db.Column(db.String(20), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='Open')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-
-#coversation history model to store the conversation history of the user and bot in the db    
 
 class ConversationHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(100), nullable=False)
     user_message = db.Column(db.Text, nullable=False)
     bot_response = db.Column(db.Text, nullable=False)    
-    
 
 
 with app.app_context():
     db.create_all()
     
-    #if admin user doesn't exist, create one
+    # if admin user doesn't exist, create one
     if not Admin_loginDetails.query.filter_by(email='admin@smartdesk.com').first():
         admin_user = Admin_loginDetails(
             email='admin@smartdesk.com',                
@@ -71,7 +61,6 @@ with app.app_context():
     # Employee creation
     emp_names = ['harish', 'santhiya', 'sathish', 'priya', 'karthik']
     for emp in emp_names:
-        # We use 'emp' here because that is the variable in your loop!
         emp_email = f"{emp}@smartdesk.com"
         emp_password = f"{emp[:2]}123"
         
@@ -87,6 +76,33 @@ with app.app_context():
     print("Database initialized successfully.")
     
 
+def search_knowledge_base(user_query):
+    """ Search the vector database and return result as a String""" 
+    try:
+        client = chromadb.PersistentClient(path="./chromadb")
+        ollama_ef = embedding_functions.OllamaEmbeddingFunction(
+            model_name="nomic-embed-text",
+            url=f"{OLLAMA_BASE_URL}/api/embeddings",
+        )
+        
+        collection = client.get_or_create_collection(name="SmartDesk_KnowledgeBase", embedding_function=ollama_ef)
+        question_embedding = ollama_ef([user_query])
+
+        results = collection.query(
+            query_embeddings=question_embedding,
+            n_results=2
+        )
+
+        documents = results.get('documents', [[]])[0]
+        if not documents:
+            return "No specific information found in the knowledge base."
+            
+        return "\n".join(documents)
+        
+    except Exception as e:
+        print(f"RAG Error: {e}")
+        return "Internal Knowledge Base is currently offline."    
+
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -99,9 +115,11 @@ def employee_login():
         user = Employee_loginDetails.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password, password):
+            session.clear()
+            session['chat_session_id'] = str(uuid.uuid4())
+            
             session['user_id'] = user.id
             session['role'] = 'employee'
-            
             session['email'] = user.email 
             
             return redirect(url_for('employee_dashboard'))
@@ -120,11 +138,10 @@ def admin_login():
        
         user = Admin_loginDetails.query.filter_by(email=email).first()
         
-        # If the user exists, check the password
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             session['role'] = 'admin'
-            session['email'] = user.email # Good practice to save this here too
+            session['email'] = user.email 
             return redirect(url_for('admin_dashboard'))
         else:
             flash("Invalid Admin Credentials! Please try again.")
@@ -135,17 +152,25 @@ def admin_login():
 
 @app.route("/admin-dashboard")
 def admin_dashboard():    
-    return render_template("AdminDashBoard.html")
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+    
+    all_tickets = Ticket.query.all()
+    return render_template("AdminDashBoard.html", tickets=all_tickets)
 
 
 @app.route('/employee-dashboard')
 def employee_dashboard():
-    return render_template('EmployeeDashboard.html')
+    if 'email' not in session:
+        return redirect(url_for('employee_login'))
+    
+    user_email = session['email']
+    my_tickets = Ticket.query.filter_by(email=user_email).all()
+    return render_template('EmployeeDashboard.html', tickets=my_tickets)
 
 
 @app.route('/chat-bot')
 def render_chatbot():
-   
     if 'email' not in session:
         return redirect(url_for('employee_login'))
     return render_template('ChatBot.html')
@@ -158,35 +183,58 @@ def chatbot_api():
     if 'chat_session_id' not in session:
         session['chat_session_id'] = str(uuid.uuid4())
     current_session_id = session.get('chat_session_id')
-    
-    # Get RAG Context
+  
     rag_context = search_knowledge_base(user_message)
+    print(f"--- DEBUG RAG DATA: {rag_context} ---")
     
-    # Construct System Prompt
+    
     system_prompt = f"""
-    You are a helpful IT assistant for the employees of SmartDesk.
-    Use the following Knowledge Base context to solve the issue: {rag_context}
     
-    If you are not able to resolve the issue using the context, politely suggest raising a ticket to the admin. 
-    If the employee explicitly agrees to raise a ticket, you MUST include the exact tag "[RAISE_TICKET]" in your response, followed by a brief summary.
+    Strick Guidelines for the AI Assistant:
+1. You are a helpful IT assistant for SMARTDESK.
+2. Keep responses concise (max 4-5 sentences). No Markdown formatting like **bolding** or *italics*.
+3. PRIORITY: Check {rag_context} first. If a solution exists, provide it immediately.
+4. HALLUCINATION: Never assume values. If a user hasn't given the priority, do NOT guess it.
+
+Conversation Flow & Rules:
+- GREETING: If vague, ask for a title. If specific, extract the title yourself and help.
+- ATTEMPT FIX: Use {rag_context}. If you provide a fix, ask "Did that resolve the issue?"
+- ESCALATION INITIATION: If the fix fails or isn't in context, ask: "Would you like me to raise a ticket to the admin?"
+- GATHERING DATA: Only if they say "Yes", ask for CATEGORY(Network / Hardware / Software /
+Access). Once category is provided, ask for PRIORITY (Low / Medium / High). 
+- FINAL TICKET TRIGGER: 
+    - You MUST wait until you have the Title, Description, Category, and Priority.
+    - Only after the user provides the Priority, confirm you are raising it and append the [RAISE_TICKET] tag.
+    - NEVER include [RAISE_TICKET] in a message where you are still asking a question.
+
+CRITICAL TICKET FORMAT:
+- The [RAISE_TICKET] tag and JSON must only appear ONCE, at the very end of the final confirmation message.
+- Example: I have all the details. I am raising the ticket now. Have a great day! [RAISE_TICKET] {{"title": "...", "description": "...", "category": "...", "priority": "..."}}
+
+ENDINGS:
+- If the user says "Thank you" or "Thanks", say "You're welcome! Have a great day!" and DO NOT raise a ticket.
+- If the user says "Bye", end gracefully.
+    
+
+
     """
     
-    # Load History
+   
     history_records = ConversationHistory.query.filter_by(session_id=current_session_id).all()
     messages = [{"role": "system", "content": system_prompt}]
     
-    for record in history_records[-5:]: 
+    for record in history_records[-10:]: 
         messages.append({"role": "user", "content": record.user_message})
         messages.append({"role": "assistant", "content": record.bot_response})
         
     messages.append({"role": "user", "content": user_message})
 
-    # Call Ollama
+   
     try:
         ollama_response = requests.post(
             f"{OLLAMA_BASE_URL}/api/chat",
             json={
-                "model": "gpt-oss:120b-cloud ", 
+                "model": "gpt-oss:120b-cloud",
                 "messages": messages,
                 "stream": False
             }
@@ -196,23 +244,47 @@ def chatbot_api():
     except Exception as e:
         print(f"Ollama Error: {e}")
         return jsonify({'response': 'Sorry, the AI engine is currently unreachable.'})
-
-  
+    
     if "[RAISE_TICKET]" in bot_response_text:
-        bot_response_text = bot_response_text.replace("[RAISE_TICKET]", "").strip()
-        
-        new_ticket = Ticket(
-            email=session.get('email', 'unknown@smartdesk.com'),
-            title="AI Escalated Ticket",
-            description=f"Automated ticket raised from chat. Last user message: {user_message}",
-            category="General", 
-            priority="Medium",
-            status="Open"
-        )
-        db.session.add(new_ticket)
-        db.session.commit()
-        
-        bot_response_text += "\n\n(A support ticket has been automatically created for you. You can track it on your dashboard.)"
+        try:
+         
+            parts = bot_response_text.split("[RAISE_TICKET]")
+            friendly_bot_message = parts[0].strip()
+            json_string_part = parts[1].strip()
+
+    
+            json_match = re.search(r'\{.*\}', json_string_part, re.DOTALL)
+            
+            if json_match:
+                ticket_data = json.loads(json_match.group(0))
+                
+                required_fields = ["title", "description", "category", "priority"]
+         
+                if all(field in ticket_data for field in required_fields):
+                 
+                    new_ticket = Ticket(
+                        email=session.get('email', 'unknown@smartdesk.com'),
+                        title=ticket_data["title"],
+                        description=ticket_data["description"],
+                        category=ticket_data["category"],
+                        priority=ticket_data["priority"],
+                        status="Open"
+                    )
+                    db.session.add(new_ticket)
+                    db.session.commit()
+                    
+                    
+                    bot_response_text = friendly_bot_message + "\n\n(✅ Support ticket created. Track it on your dashboard.)"
+                else:
+           
+                    bot_response_text = friendly_bot_message
+            else:
+                bot_response_text = friendly_bot_message
+
+        except Exception as e:
+            print(f"Ticket Logic Error: {e}")
+
+            bot_response_text = bot_response_text.replace("[RAISE_TICKET]", "").strip()
 
 
     new_convo = ConversationHistory(
@@ -225,5 +297,6 @@ def chatbot_api():
     
     return jsonify({'response': bot_response_text})
 
+ 
 if __name__ == "__main__":
     app.run(debug=True)
