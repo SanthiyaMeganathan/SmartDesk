@@ -6,13 +6,44 @@
     </head>
     <body>
         <div class="DashBoard-container">
+          
+            <button type="button" class="btn-logout" onclick="window.location.href='/logout'" style="float: right; margin-left: 10px;">
+                Logout
+            </button>
+            
             <h2>Welcome To AdminDashboard</h2>
-            <div class ="dashboard-summary-filter">
+            
+            <div class="dashboard-summary-filter">
+          
+                <form action="{{ url_for('admin_dashboard') }}" method="GET" class="filter-form">
+                    <select name="status" class="filter-select">
+                        <option value="">Status: All</option>
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
+
+                    <select name="category" class="filter-select">
+                        <option value="">Category: All</option>
+                        <option value="Network">Network</option>
+                        <option value="Hardware">Hardware</option>
+                        <option value="Software">Software</option>
+                        <option value="Access">Access</option>
+                    </select>
+
+                    <select name="priority" class="filter-select">
+                        <option value="">Priority: All</option>
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+
+                    <button type="submit" class="btn-filter-tickets">Apply Filter</button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn-reset">Reset</a>
+                </form>
+
                 <button type="button" class="btn-view-tickets" onclick="window.location.href='/view-tickets'">
-                   show summary of tickets
-                </button>
-                <button type ="button" class="btn-filter-tickets" onclick="window.location.href='/filter-tickets'">
-                    Filter tickets  
+                    show summary of tickets
                 </button>
             </div>
 
@@ -40,9 +71,36 @@
                             <td>{{ ticket.description }}</td>
                             <td>{{ ticket.category }}</td>
                             <td>{{ ticket.priority }}</td>
-                            <td><span class="status-{{ ticket.status }}">{{ ticket.status }}</span></td>
+                            <td>
+                               
+                                <form action="{{ url_for('update_ticket_status', ticket_id=ticket.id) }}" method="POST" style="display:inline;">
+                                    <select name="new_status" onchange="this.form.submit()" class="status-dropdown status-{{ ticket.status|lower|replace(' ', '-') }}">
+                                   
+                                        <option value="{{ ticket.status }}" selected disabled>{{ ticket.status }}</option>
+                                        
+                                
+                                        {% if ticket.status != 'Open' %}
+                                            <option value="Open">Open</option>
+                                        {% endif %}
+                                        
+                                        {% if ticket.status != 'In Progress' %}
+                                            <option value="In Progress">In Progress</option>
+                                        {% endif %}
+                                        
+                                        {% if ticket.status != 'Resolved' %}
+                                            <option value="Resolved">Resolved</option>
+                                        {% endif %}
+                                    </select>
+                                </form>
+                            </td>
                         </tr>
                         {% endfor %}
+                        
+                        {% if not tickets %}
+                        <tr>
+                            <td colspan="8" style="text-align: center;">No tickets found matching these filters.</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>

@@ -10,6 +10,10 @@
 <body>
     <div class="container">
         <header>
+           
+            <button type="button" class="btn-logout" onclick="window.location.href='/logout'" style="float: right;">
+                Logout
+            </button>
             <h1>Employee Dashboard</h1>
             <p>Welcome to your dashboard!</p>
         </header>
@@ -45,7 +49,7 @@
                             <td>{{ ticket.description }}</td>
                             <td>{{ ticket.category }}</td>
                             <td>{{ ticket.priority }}</td>
-                            <td><span class="status-{{ ticket.status }}">{{ ticket.status }}</span></td>
+                            <td><span class="status-{{ ticket.status|lower|replace(' ', '-') }}">{{ ticket.status }}</span></td>
                         </tr>
                         {%- endfor -%}
                     </tbody>

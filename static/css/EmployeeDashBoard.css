@@ -87,3 +87,19 @@ header p {
 .ticket-table th {
     background-color: #f2f2f2;
 }
+.btn-logout {
+    background-color: #ffcccc; 
+    color: #b30000;
+    border: 2px solid #b30000;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: bold;
+    font-family: 'Trebuchet MS', sans-serif;
+    transition: background-color 0.3s;
+}
+
+.btn-logout:hover {
+    background-color: #ff9999;
+    color: white;
+}

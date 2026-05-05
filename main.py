@@ -149,14 +149,23 @@ def admin_login():
             
     return render_template('AdminLogin.html') 
 
-
-@app.route("/admin-dashboard")
-def admin_dashboard():    
+@app.route("/update-ticket-status/<int:ticket_id>", methods=['POST'])
+def update_ticket_status(ticket_id):
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
+
+    new_status = request.form.get('new_status')
+    ticket = Ticket.query.get_or_404(ticket_id)
     
-    all_tickets = Ticket.query.all()
-    return render_template("AdminDashBoard.html", tickets=all_tickets)
+    if new_status in ['Open', 'In Progress', 'Resolved']:
+        ticket.status = new_status
+        db.session.commit()
+        flash(f"Ticket #{ticket_id} updated to {new_status}")
+    
+    return redirect(url_for('admin_dashboard'))
+
+
+
 
 
 @app.route('/employee-dashboard')
@@ -174,6 +183,64 @@ def render_chatbot():
     if 'email' not in session:
         return redirect(url_for('employee_login'))
     return render_template('ChatBot.html')
+
+@app.route('/logout')
+def logout():
+    role = session.get('role')
+    
+    session.clear()
+    
+    if role == 'admin':
+        flash("You have been logged out of the Admin portal.")
+        return redirect(url_for('admin_login'))
+    else:
+        flash("You have been logged out of the Employee portal.")
+        return redirect(url_for('employee_login'))
+
+@app.route("/admin-dashboard")
+def admin_dashboard():    
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+ 
+    status_filter = request.args.get('status')
+    category_filter = request.args.get('category')
+    priority_filter = request.args.get('priority')
+
+   
+    query = Ticket.query
+
+  
+    if status_filter:
+        query = query.filter(Ticket.status == status_filter)
+    
+    if category_filter:
+        query = query.filter(Ticket.category == category_filter)
+        
+    if priority_filter:
+        query = query.filter(Ticket.priority == priority_filter)
+
+    all_tickets = query.all()
+    
+    return render_template("AdminDashBoard.html", tickets=all_tickets)
+
+@app.route("/view-tickets")
+def admin_summary():
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+
+    # Calculate counts for each status
+    open_count = Ticket.query.filter_by(status='Open').count()
+    progress_count = Ticket.query.filter_by(status='In Progress').count()
+    resolved_count = Ticket.query.filter_by(status='Resolved').count()
+    total_count = Ticket.query.count()
+
+    return render_template(
+        "AdminSummary.html", 
+        open=open_count, 
+        progress=progress_count, 
+        resolved=resolved_count, 
+        total=total_count
+    )
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot_api():

@@ -1,57 +1,70 @@
+
 body {
     background-color: #7184f2;
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 .DashBoard-container {
     padding: 20px;
 }
 
-.Ticket-table { 
-    height: auto; 
-    margin-top: 20px;
-    clear: both; 
-}
-
-.ticket-table {
-    width: 100%;
-    border: 2px solid rgb(102, 4, 4); 
-    border-collapse: collapse;
-    border-width: 2px;
-    background-color: #dbeefc; 
-}
-
-.ticket-table th, .ticket-table td {
-    text-align: left;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    text-emphasis-color: rgb(3, 133, 3);
-    border: 1px solid rgb(102, 4, 4);
-    padding: 12px;
-}
-
-.ticket-table th {
-    background-color: #f2f2f2;
-}
-
-.btn-view-tickets {
-    background-color: #F0FFC2;
-    color: black;
-    border: 2px solid black; 
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 10px;
-    text-decoration: underline;
-    text-transform: capitalize;
+.DashBoard-container h2 {
+    color: #F5FBE6;
     text-align: center;
-    font-style: oblique;
+    margin-bottom: 20px;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    margin-bottom: 10px;
-    font-size: 16px;
-    float: right;
+    font-style: italic;
+    text-decoration-line: underline;
 }
 
-.btn-filter-tickets {
-    background-color: #B5E18B;
+
+.dashboard-summary-filter {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap; 
+}
+
+
+.filter-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #dbeefc;
+    padding: 12px;
+    border: 2px solid rgb(102, 4, 4);
+    border-radius: 10px;
+}
+
+.filter-select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid rgb(102, 4, 4);
+    font-family: 'Trebuchet MS', sans-serif;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+
+.btn-reset {
+    text-decoration: none;
+    color: rgb(102, 4, 4);
+    font-weight: bold;
+    font-size: 14px;
+    font-family: Cambria, Cochin, Georgia, serif;
+    margin-left: 5px;
+}
+
+.btn-reset:hover {
+    text-decoration: underline;
+}
+
+
+.btn-filter-tickets, .btn-view-tickets {
     color: black;
     border: 2px solid black;
     padding: 10px 20px;
@@ -62,17 +75,92 @@ body {
     text-align: center;
     font-style: oblique;
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    margin-bottom: 10px;
     font-size: 16px;
-    float: right;
-    margin-right: 2px;
 }
 
-.DashBoard-container h2 {
-    color: #F5FBE6;
-    text-align: center;
-    margin-bottom: 20px;
-    font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    font-style: italic;
-    text-decoration-line: underline;
+.btn-filter-tickets {
+    background-color: #B5E18B;
+    text-decoration: none;
+}
+
+.btn-view-tickets {
+    background-color: #F0FFC2;
+}
+
+
+.Ticket-table { 
+    margin-top: 20px;
+    clear: both; 
+}
+
+.ticket-table {
+    width: 100%;
+    border: 2px solid rgb(102, 4, 4); 
+    border-collapse: collapse;
+    background-color: #dbeefc; 
+}
+
+.ticket-table th, .ticket-table td {
+    text-align: left;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    border: 1px solid rgb(102, 4, 4);
+    padding: 12px;
+}
+
+.ticket-table th {
+    background-color: #f2f2f2;
+}
+
+
+.status-open {
+    color: #d9534f; 
+    font-weight: bold;
+}
+
+.status-in-progress {
+    color: #f0ad4e; 
+    font-weight: bold;
+}
+
+.status-resolved {
+    color: #5cb85c; 
+    font-weight: bold;
+}
+
+.status-dropdown {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    background-color: white;
+}
+
+
+select.status-open { color: #d9534f; }
+select.status-in-progress { color: #f0ad4e; }
+select.status-resolved { color: #5cb85c; }
+
+
+.status-dropdown:focus {
+    outline: none;
+    border-color: #7184f2;
+}
+
+.btn-logout {
+    background-color: #ffcccc; 
+    color: #b30000;
+    border: 2px solid #b30000;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: bold;
+    font-family: 'Trebuchet MS', sans-serif;
+    transition: background-color 0.3s;
+}
+
+.btn-logout:hover {
+    background-color: #ff9999;
+    color: white;
 }
