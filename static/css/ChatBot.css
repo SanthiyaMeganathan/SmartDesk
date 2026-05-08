@@ -25,6 +25,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+
 #chat-box {
     flex: 1; 
     overflow-y: auto; 
@@ -37,7 +38,6 @@
     gap: 12px; 
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); 
 }
-
 
 #chat-box::-webkit-scrollbar {
     width: 6px;
@@ -63,11 +63,12 @@
     background-color: #ffffff;
     font-size: 1rem;
     outline: none; 
-    transition: border-color 0.3s;
+    transition: all 0.3s ease;
 }
 
 .chat-input-area #user-input:focus {
     border: 2px solid darkblue; 
+    box-shadow: 0 0 5px rgba(0,0,139, 0.2);
 }
 
 .chat-input-area #send-btn {
@@ -93,33 +94,89 @@
 
 .message {
     padding: 12px 16px;
-    max-width: 85%;
+    max-width: 80%;
     width: fit-content;
     word-wrap: break-word; 
     white-space: pre-wrap; 
     font-size: 0.95rem;
     line-height: 1.4;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     animation: fadeIn 0.3s ease-in-out;
 }
 
-.user {
+
+.user-message {
     background-color: darkblue;
     color: white;
     align-self: flex-end; 
     border-radius: 18px 18px 0 18px; 
+    margin-left: auto;
 }
 
-.bot {
-    background-color: #f5f5f5;
+.bot-message {
+    background-color: #f1f1f1;
     color: #333;
     align-self: flex-start;
     border-radius: 18px 18px 18px 0; 
     border: 1px solid #e0e0e0;
+    margin-right: auto;
 }
 
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(5px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+
+.gui-form-card {
+    background-color: #f9f9f9;
+    border: 2px solid #7184f2;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 90%;
+    align-self: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.gui-form-card input, .gui-form-card textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.gui-form-card textarea {
+    height: 80px;
+    resize: none;
+}
+
+.gui-row {
+    display: flex;
+    gap: 10px;
+}
+
+.gui-row input {
+    flex: 1;
+}
+
+#gui-submit-btn {
+    background-color: #9ddc63;
+    color: black;
+    border: 2px solid black;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 0.2s;
+}
+
+#gui-submit-btn:hover {
+    background-color: #98d562;
 }

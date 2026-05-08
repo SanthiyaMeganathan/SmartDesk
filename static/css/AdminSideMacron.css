@@ -1,0 +1,173 @@
+body {
+    margin: 0;
+
+
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background-color: white; 
+    border-right: 1px solid #adabab; 
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box; 
+    box-sizing: border-box;
+    position:fixed;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+.brand-header{
+    border-bottom:1px solid #888;
+
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap:14px;
+    margin:0 -20px 30px -20px;
+    padding: 0 20px 20px 20px;
+
+
+}
+
+.brand-header i{
+    font-size:40px;
+    color:#000000;
+}
+
+.brand-header h2{
+    margin:0;
+    font-size: 1.1rem;
+}
+
+.brand-header p{
+    margin:0.2rem;
+    font-size:0.9rem;
+    color: #888;
+
+}
+
+
+.badge {
+    margin-left: auto; 
+    background-color: #fee2e2; 
+    color: #ef4444; 
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.nav-group{
+    
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.label{
+    font-size:0.95rem;
+    color:#888;
+    letter-spacing: 1px;
+    padding-left: 12px;
+}
+
+
+.nav-item{
+    display: flex;
+    align-items: center;
+    gap:12px;
+    text-decoration: none;
+    color: #5c5c5c;
+    padding: 10px 12px; /*10px top bottom , left and right*/
+    border-radius: 8px;
+    transition: all 0.2s;
+
+}
+
+.nav-item:hover{
+    background-color: #dcd9d9;
+    color: #000000;
+
+}
+
+.admin-profile{
+    margin-top: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top:1px solid #eee;
+    text-decoration: none;
+    gap:12px;
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 20px 20px 0 20px;
+ 
+    border-top:1px solid #888;
+}
+ 
+
+
+.logout-btn{
+
+    padding:5px;
+    text-decoration: none;
+    font-size: 1.5rem;
+    color: #888;
+    transition: all 0.2s;
+
+
+
+}
+
+.logout-btn:hover{
+    color: #ef4444;
+}
+
+.user-avatar{
+    width:36px;
+    height:36px;
+    background-color: rgb(202, 233, 244);
+    color: black;
+    border-radius: 50%;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    font-size: 1.2rem ;
+    flex-shrink: 0;
+}
+
+.user-meta{
+    flex-grow:1;
+}
+
+
+.user-meta h2{
+    font-size:1rem;
+    font-weight:600;
+    margin: 0;
+    color: #000000;
+    align-items: center;
+
+}
+
+.user-meta p{
+    font-size:0.9rem;
+    margin:0;
+    color: #888;
+    margin-top: 0.2rem;
+    align-items: center;
+
+}
+
+
+.nav-item.active {
+    background-color: #f3f4f6;
+    color: #000000;
+    font-weight: 600;
+}
+

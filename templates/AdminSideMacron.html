@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartDesk Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminSideMacron.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="Brand-section">
+            <div class="brand-header">
+                <i class="ri-home-smile-line"></i>
+                <div>
+                    <h2>SmartDesk</h2>
+                    <p>Admin Portal</p> 
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-container">
+            <div class="nav-group">
+                <span class="label">MAIN</span>
+                <a href="#" class="nav-item"> 
+                    <i class="ri-dashboard-line"></i>
+                    DashBoard
+                </a>
+                <a href="#" class="nav-item"> 
+                    <i class="ri-coupon-2-line"></i>
+                    All Tickets
+                    <span class="badge">20</span>
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <span class="label">REPORTS</span>
+                <a href="#" class="nav-item">
+                    <i class="ri-bar-chart-2-line"></i>
+                    Analytics
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ri-export-line"></i>
+                    Export
+                </a>
+            </div>
+
+            <div class="nav-group">
+                <span class="label">CONFIG</span>
+                <a href="#" class="nav-item">
+                    <i class="ri-stack-line"></i> Categories
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="ri-settings-2-line"></i>
+                    Settings
+                </a>
+            </div>
+        </div>
+
+        <div class="admin-profile">
+    <div class="user-avatar">
+        <i class="ri-user-line"></i>
+    </div>
+    
+    <div class="user-meta">
+        <h2>Admin User</h2>
+        <p>IT Admin</p> 
+    </div>
+
+    <a href="{{ url_for('logout') }}" class="logout-btn">
+        <i class="ri-logout-box-r-line"></i>
+    </a>
+</div>
+
+        
+    </nav>
+
+</body>
+</html>

@@ -86,22 +86,7 @@ this is my current code for employee login and employee dashboard and admin logi
         return "Internal Knowledge Base is currently offline."    
     
     
-    @app.route("/admin-dashboard")
-def admin_dashboard():
- 
-    if session.get('role') != 'admin':
-        return redirect(url_for('admin_login'))
-    
-    
-    all_tickets = Ticket.query.all()
-    
-    return render_template("AdminDashBoard.html", tickets=all_tickets)
 
 
-@app.route('/employee-dashboard')
-def employee_dashboard():
-    if 'email' not in session:
-        return redirect(url_for('employee_login'))
-    user_email = session['email']
-    my_tickets = Ticket.query.filter_by(email=user_email).all()
-    return render_template('EmployeeDashboard.html', tickets=my_tickets)
+# rough work for new ui .. here we needed few changes accoridng to the new ui sent by abishek:
+

@@ -8,7 +8,7 @@ import chromadb
 from chromadb.utils import embedding_functions
 import json
 import re
-
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = 'my_secret_key'
@@ -39,6 +39,8 @@ class Ticket(db.Model):
     priority = db.Column(db.String(20), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='Open')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    proceeding_started = db.Column(db.DateTime, nullable=True)
+    resolved_at = db.Column(db.DateTime, nullable=True)
 
 class ConversationHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -127,7 +129,10 @@ def employee_login():
             flash("Invalid Employee Credentials! Please try again.")
             return render_template('EmployeeLogin.html')
             
-    return render_template('EmployeeLogin.html')    
+    return render_template('EmployeeLogin.html') 
+
+
+   
 
 
 @app.route('/admin-login', methods=['GET', 'POST'])
@@ -148,23 +153,7 @@ def admin_login():
             return render_template('AdminLogin.html')
             
     return render_template('AdminLogin.html') 
-
-@app.route("/update-ticket-status/<int:ticket_id>", methods=['POST'])
-def update_ticket_status(ticket_id):
-    if session.get('role') != 'admin':
-        return redirect(url_for('admin_login'))
-
-    new_status = request.form.get('new_status')
-    ticket = Ticket.query.get_or_404(ticket_id)
-    
-    if new_status in ['Open', 'In Progress', 'Resolved']:
-        ticket.status = new_status
-        db.session.commit()
-        flash(f"Ticket #{ticket_id} updated to {new_status}")
-    
-    return redirect(url_for('admin_dashboard'))
-
-
+   
 
 
 
@@ -197,173 +186,265 @@ def logout():
         flash("You have been logged out of the Employee portal.")
         return redirect(url_for('employee_login'))
 
+from datetime import datetime, timedelta
+
 @app.route("/admin-dashboard")
 def admin_dashboard():    
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
- 
+
+  
     status_filter = request.args.get('status')
     category_filter = request.args.get('category')
     priority_filter = request.args.get('priority')
 
-   
     query = Ticket.query
 
-  
     if status_filter:
         query = query.filter(Ticket.status == status_filter)
-    
     if category_filter:
         query = query.filter(Ticket.category == category_filter)
-        
     if priority_filter:
         query = query.filter(Ticket.priority == priority_filter)
 
-    all_tickets = query.all()
+  
+    filtered_tickets = query.all()
+
+
+    global_total = Ticket.query.count()
+    global_open = Ticket.query.filter_by(status='Open').count()
+    global_progress = Ticket.query.filter_by(status='In Progress').count()
+    global_resolved = Ticket.query.filter_by(status='Resolved').count()
+
+   
+    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    recent_raised_count = Ticket.query.filter(Ticket.created_at >= seven_days_ago).count()
+
+  
+    open_pct = round((global_open / global_total * 100), 1) if global_total > 0 else 0
+    progress_pct = round((global_progress / global_total * 100), 1) if global_total > 0 else 0
+
+  
+    categories_to_track = [
+        ('Network', 'network'),
+        ('Software', 'software'),
+        ('Hardware', 'hardware'),
+        ('Access', 'access')
+    ]
     
-    return render_template("AdminDashBoard.html", tickets=all_tickets)
+    cat_analytics = {}
+    for display_name, key in categories_to_track:
+        count = Ticket.query.filter_by(category=display_name).count()
+        percentage = (count / global_total * 100) if global_total > 0 else 0
+        cat_analytics[key] = {
+            'count': count,
+            'pct': round(percentage, 1)
+        }
+
+   
+    resolved_list = Ticket.query.filter(Ticket.status == 'Resolved', Ticket.resolved_at != None).all()
+    if resolved_list:
+        total_seconds = sum([(t.resolved_at - t.created_at).total_seconds() for t in resolved_list])
+        avg_seconds = total_seconds / len(resolved_list)
+        avg_days = round(avg_seconds / 86400, 1) 
+        avg_res_time = f"{avg_days} days"
+    else:
+        avg_res_time = "0.0 days"
+
+
+    top_five = Ticket.query.order_by(Ticket.created_at.desc()).limit(5).all()
+
+  
+    return render_template (
+        "AdminDashBoard.html",
+        # Global Counts
+        total=global_total,
+        open=global_open,
+        progress=global_progress,
+        resolved=global_resolved,
+        # Analytical data
+        open_pct=open_pct,
+        progress_pct=progress_pct,
+        recent_count=recent_raised_count,
+        avg_res_time=avg_res_time,
+        cat_stats=cat_analytics,
+        # Lists for the UI
+        tickets=filtered_tickets,  
+        recent_tickets=top_five   )
+    
+    
+@app.route("/update-ticket-status/<int:ticket_id>", methods=['POST'])
+def update_ticket_status(ticket_id):
+    new_status = request.form.get('new_status')
+    ticket = Ticket.query.get_or_404(ticket_id)
+    now = datetime.utcnow()
+    
+    if new_status in ['Open', 'In Progress', 'Resolved']:
+        # 1. Resetting Logic (Moving Backwards)
+        if new_status == 'Open':
+            # Case: Resolved -> Open or Progress -> Open
+            ticket.proceeding_started = None
+            ticket.resolved_at = None
+
+        # 2. Progress Logic
+        elif new_status == 'In Progress':
+            # Case: Open -> Progress or Resolved -> Progress
+            ticket.proceeding_started = now
+            ticket.resolved_at = None # In case it was previously resolved
+
+        # 3. Resolution Logic
+        elif new_status == 'Resolved':
+            # Case: Open -> Resolved or Progress -> Resolved
+            ticket.resolved_at = now
+            # Handle the "Skip Progress" edge case
+            if not ticket.proceeding_started:
+                ticket.proceeding_started = now 
+            
+        ticket.status = new_status
+        db.session.commit()
+        
+    return redirect(url_for('admin_dashboard'))    
+    
 
 @app.route("/view-tickets")
 def admin_summary():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
 
-    # Calculate counts for each status
+   
     open_count = Ticket.query.filter_by(status='Open').count()
     progress_count = Ticket.query.filter_by(status='In Progress').count()
     resolved_count = Ticket.query.filter_by(status='Resolved').count()
     total_count = Ticket.query.count()
 
     return render_template(
-        "AdminSummary.html", 
+        "AdminDashBoard.html", 
         open=open_count, 
         progress=progress_count, 
         resolved=resolved_count, 
         total=total_count
     )
-
+    
 @app.route('/chatbot', methods=['POST'])
 def chatbot_api():
     data = request.get_json()
     user_message = data.get('message')
-    
-    if 'chat_session_id' not in session:
-        session['chat_session_id'] = str(uuid.uuid4())
+    if 'chat_session_id' not in session: session['chat_session_id'] = str(uuid.uuid4())
     current_session_id = session.get('chat_session_id')
-  
     rag_context = search_knowledge_base(user_message)
-    print(f"--- DEBUG RAG DATA: {rag_context} ---")
-    
     
     system_prompt = f"""
     
-    Strick Guidelines for the AI Assistant:
-1. You are a helpful IT assistant for SMARTDESK.
-2. Keep responses concise (max 4-5 sentences). No Markdown formatting like **bolding** or *italics*.
-3. PRIORITY: Check {rag_context} first. If a solution exists, provide it immediately.
-4. HALLUCINATION: Never assume values. If a user hasn't given the priority, do NOT guess it.
+Role: You are the SMARTDESK IT Assistant. Your goal is to resolve issues using {rag_context} or gather data to trigger a ticket GUI.
 
-Conversation Flow & Rules:
-- GREETING: If vague, ask for a title. If specific, extract the title yourself and help.
-- ATTEMPT FIX: Use {rag_context}. If you provide a fix, ask "Did that resolve the issue?"
-- ESCALATION INITIATION: If the fix fails or isn't in context, ask: "Would you like me to raise a ticket to the admin?"
-- GATHERING DATA: Only if they say "Yes", ask for CATEGORY(Network / Hardware / Software /
-Access). Once category is provided, ask for PRIORITY (Low / Medium / High). 
-- FINAL TICKET TRIGGER: 
-    - You MUST wait until you have the Title, Description, Category, and Priority.
-    - Only after the user provides the Priority, confirm you are raising it and append the [RAISE_TICKET] tag.
-    - NEVER include [RAISE_TICKET] in a message where you are still asking a question.
+Strict Formatting Rules:
 
-CRITICAL TICKET FORMAT:
-- The [RAISE_TICKET] tag and JSON must only appear ONCE, at the very end of the final confirmation message.
-- Example: I have all the details. I am raising the ticket now. Have a great day! [RAISE_TICKET] {{"title": "...", "description": "...", "category": "...", "priority": "..."}}
+Keep responses concise (max 4-5 sentences).
 
-ENDINGS:
-- If the user says "Thank you" or "Thanks", say "You're welcome! Have a great day!" and DO NOT raise a ticket.
-- If the user says "Bye", end gracefully.
+NO MARKDOWN: Do not use bolding, italics, or lists. Use plain text only.
+
+Never hallucinate: If data is missing (Priority, Category, etc.), you must ask for it.
+
+Always ask the Questiions one at a time. Do not ask for multiple pieces of information in the same message. If you need to ask for multiple pieces of information, ask for them sequentially, one at a time, and wait for the user's response before asking the next question.
+
+Phase 1: Diagnosis & Fix
+
+Greeting: If the user is vague, ask for a clear title/summary of the issue.
+
+RAG Check: Check {rag_context} first. If a solution exists, provide it and ask: Did that resolve the issue?
+
+Escalation: If the user says no, or no solution exists, ask: Would you like me to raise a ticket to the admin?
+
+Phase 2: Ticket Data Gathering (Only if user says Yes)
+
+Category: Identify if the issue is Network, Hardware, Software, or Access. Ask only if it is unclear. Try to infer from the conversation first before asking.Maximum avoid asking and you try to find out by your own.!
+
+Description: Ask the user to describe what they are experiencing.
+
+Priority: Explicitly ask for Low, Medium, or High.
+
+Phase 3: GUI Trigger & User Voice
+
+When constructing the description field for the JSON, you must write in the first-person voice of the user.
+
+DIRECT START RULE: The description must start immediately with the problem or the action taken.
+
+FORBIDDEN FRONTIER: Do not start the description with phrases like "I see a message saying...", "The user said...", "There is an error...", or "I am told that...".
+
+User Voice Example: I cannot use my personal device with the office network. It used to work, but today it stopped and I cannot connect my phone to the hotspot. I need help to resolve this connection issue.
+
+Constraint: Never use bot-speak like "The user is reporting..." in the JSON description.
     
+Phase 4: Final Trigger
 
+You must have: Title, Description, Category, and Priority.
 
+The [RAISE_TICKET] tag and JSON must appear only once at the very end of the final confirmation.
+
+Format: Final confirmation text. [RAISE_TICKET] {{"title": "...", "description": "...", "category": "...", "priority": "..."}}
+
+Closures:
+
+If the user says "Thank you," respond: "You are welcome! Have a great day!"
+
+If the user says "Bye," end gracefully.
     """
     
-   
     history_records = ConversationHistory.query.filter_by(session_id=current_session_id).all()
     messages = [{"role": "system", "content": system_prompt}]
-    
-    for record in history_records[-10:]: 
+    for record in history_records[-10:]:
         messages.append({"role": "user", "content": record.user_message})
         messages.append({"role": "assistant", "content": record.bot_response})
-        
     messages.append({"role": "user", "content": user_message})
 
-   
     try:
-        ollama_response = requests.post(
-            f"{OLLAMA_BASE_URL}/api/chat",
-            json={
-                "model": "gpt-oss:120b-cloud",
-                "messages": messages,
-                "stream": False
-            }
-        )
-        ollama_data = ollama_response.json()
-        bot_response_text = ollama_data.get('message', {}).get('content', 'Sorry, I encountered an error formatting my response.')
-    except Exception as e:
-        print(f"Ollama Error: {e}")
-        return jsonify({'response': 'Sorry, the AI engine is currently unreachable.'})
+        ollama_response = requests.post(f"{OLLAMA_BASE_URL}/api/chat",
+            json={"model": "gpt-oss:120b-cloud", "messages": messages, "stream": False})
+        bot_response_text = ollama_response.json().get('message', {}).get('content', 'Error.')
+    except:
+        return jsonify({'response': 'AI engine unreachable.'})
     
+    form_data = None
     if "[RAISE_TICKET]" in bot_response_text:
         try:
-         
             parts = bot_response_text.split("[RAISE_TICKET]")
-            friendly_bot_message = parts[0].strip()
-            json_string_part = parts[1].strip()
-
-    
-            json_match = re.search(r'\{.*\}', json_string_part, re.DOTALL)
-            
+            bot_response_text = parts[0].strip()
+            json_match = re.search(r'\{.*\}', parts[1].strip(), re.DOTALL)
             if json_match:
-                ticket_data = json.loads(json_match.group(0))
-                
-                required_fields = ["title", "description", "category", "priority"]
-         
-                if all(field in ticket_data for field in required_fields):
-                 
-                    new_ticket = Ticket(
-                        email=session.get('email', 'unknown@smartdesk.com'),
-                        title=ticket_data["title"],
-                        description=ticket_data["description"],
-                        category=ticket_data["category"],
-                        priority=ticket_data["priority"],
-                        status="Open"
-                    )
-                    db.session.add(new_ticket)
-                    db.session.commit()
-                    
-                    
-                    bot_response_text = friendly_bot_message + "\n\n(✅ Support ticket created. Track it on your dashboard.)"
-                else:
-           
-                    bot_response_text = friendly_bot_message
-            else:
-                bot_response_text = friendly_bot_message
-
+                form_data = json.loads(json_match.group(0))
+                bot_response_text += "\n\nPlease review and edit the ticket details below before submitting."
         except Exception as e:
-            print(f"Ticket Logic Error: {e}")
+            print(f"Extraction Error: {e}")
 
-            bot_response_text = bot_response_text.replace("[RAISE_TICKET]", "").strip()
-
-
-    new_convo = ConversationHistory(
-        session_id=current_session_id,
-        user_message=user_message,
-        bot_response=bot_response_text
-    )
-    db.session.add(new_convo)
+    db.session.add(ConversationHistory(session_id=current_session_id, user_message=user_message, bot_response=bot_response_text))
     db.session.commit()
-    
-    return jsonify({'response': bot_response_text})
+    return jsonify({'response': bot_response_text, 'show_form': form_data})
 
- 
+
+@app.route('/submit-ticket-gui', methods=['POST'])
+def submit_ticket_gui():
+    if 'email' not in session:
+        return jsonify({'status': 'error', 'message': 'Session expired.'}), 401
+    data = request.get_json()
+    try:
+        new_ticket = Ticket(
+            email=session.get('email'),
+            title=data.get("title"),
+            description=data.get("description"),
+            category=data.get("category"),
+            priority=data.get("priority"),
+            status="Open"
+        )
+        db.session.add(new_ticket)
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Ticket raised successfully!'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@app.route('/admin-side-macron')
+def adminSideMacron():
+    return render_template("AdminSideMacron.html")    
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True)    
+
