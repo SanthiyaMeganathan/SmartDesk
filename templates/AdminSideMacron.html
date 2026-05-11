@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartDesk Admin</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminSideMacron.css') }}">
+    {% block extra_css %}{% endblock %}
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
 </head>
 <body>
@@ -23,7 +24,7 @@
         <div class="nav-container">
             <div class="nav-group">
                 <span class="label">MAIN</span>
-                <a href="#" class="nav-item"> 
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item"> 
                     <i class="ri-dashboard-line"></i>
                     DashBoard
                 </a>
@@ -59,22 +60,26 @@
         </div>
 
         <div class="admin-profile">
-    <div class="user-avatar">
-        <i class="ri-user-line"></i>
-    </div>
-    
-    <div class="user-meta">
-        <h2>Admin User</h2>
-        <p>IT Admin</p> 
-    </div>
+            <div class="user-avatar">
+                <i class="ri-user-line"></i>
+            </div>
+            
+            <div class="user-meta">
+                <h2>Admin User</h2>
+                <p>IT Admin</p> 
+            </div>
 
-    <a href="{{ url_for('logout') }}" class="logout-btn">
-        <i class="ri-logout-box-r-line"></i>
-    </a>
-</div>
-
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="ri-logout-box-r-line"></i>
+            </a>
+        </div>
         
     </nav>
+
+    <div style="margin-left: 250px;">
+        {% block content %}
+        {% endblock %}
+    </div>
 
 </body>
 </html>

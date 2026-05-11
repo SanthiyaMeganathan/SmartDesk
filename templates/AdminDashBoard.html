@@ -1,112 +1,111 @@
-<!Doctype html>
-<html>
-    <head>
-        <title>Admin Dashboard</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminDashBoard.css') }}">
-    </head>
-    <body>
-        <div class="DashBoard-container">
-            <button type="button" class="btn-logout" onclick="window.location.href='/logout'">
-                Logout
-            </button>
-            
-            <h2>Welcome To AdminDashboard</h2>
-            
-            <div class="summary-cards">
-                <div class="card">
-                    <h3>Total Tickets</h3>
-                    <div class="count">{{ total }}</div>
-                </div>
+{% extends "AdminSideMacron.html" %}
 
-                <div class="card open">
-                    <h3>Open</h3>
-                    <div class="count status-red">{{ open }}</div>
-                </div>
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminDashBoard.css') }}">
+{% endblock %}   
 
-                <div class="card progress">
-                    <h3>In Progress</h3>
-                    <div class="count status-orange">{{ progress }}</div>
-                </div>
-
-                <div class="card resolved">
-                    <h3>Resolved</h3>
-                    <div class="count status-green">{{ resolved }}</div>
-                </div>
+{% block content %}     
+    <div class="DashBoard-container">
+        <button type="button" class="btn-logout" onclick="window.location.href='/logout'">
+            Logout
+        </button>
+        
+        <h2>Welcome To AdminDashboard</h2>
+        
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Total Tickets</h3>
+                <div class="count">{{ total }}</div>
             </div>
 
-            <div class="dashboard-filter-section">
-                <form action="{{ url_for('admin_dashboard') }}" method="GET" class="filter-form">
-                    <select name="status" class="filter-select">
-                        <option value="">Status: All</option>
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Resolved">Resolved</option>
-                    </select>
-
-                    <select name="category" class="filter-select">
-                        <option value="">Category: All</option>
-                        <option value="Network">Network</option>
-                        <option value="Hardware">Hardware</option>
-                        <option value="Software">Software</option>
-                        <option value="Access">Access</option>
-                    </select>
-
-                    <select name="priority" class="filter-select">
-                        <option value="">Priority: All</option>
-                        <option value="Low">Low</option>
-                        <option value="Medium">Medium</option>
-                        <option value="High">High</option>
-                    </select>
-
-                    <button type="submit" class="btn-filter-tickets">Apply Filter</button>
-                    <a href="{{ url_for('admin_dashboard') }}" class="btn-reset">Reset</a>
-                </form>
+            <div class="card open">
+                <h3>Open</h3>
+                <div class="count status-red">{{ open }}</div>
             </div>
 
-            <div class="Ticket-table">
-                <table class="ticket-table">
-                    <thead>
-                        <tr>
-                            <th>Serial Number</th>
-                            <th>Email</th>
-                            <th>Ticket Id</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Category</th>
-                            <th>Priority</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ticket in tickets %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ ticket.email }}</td>
-                            <td>{{ ticket.id }}</td>
-                            <td>{{ ticket.title }}</td>
-                            <td>{{ ticket.description }}</td>
-                            <td>{{ ticket.category }}</td>
-                            <td>{{ ticket.priority }}</td>
-                            <td>
-                                <form action="{{ url_for('update_ticket_status', ticket_id=ticket.id) }}" method="POST" style="display:inline;">
-                                    <select name="new_status" onchange="this.form.submit()" class="status-dropdown status-{{ ticket.status|lower|replace(' ', '-') }}">
-                                        <option value="{{ ticket.status }}" selected disabled>{{ ticket.status }}</option>
-                                        {% if ticket.status != 'Open' %}<option value="Open">Open</option>{% endif %}
-                                        {% if ticket.status != 'In Progress' %}<option value="In Progress">In Progress</option>{% endif %}
-                                        {% if ticket.status != 'Resolved' %}<option value="Resolved">Resolved</option>{% endif %}
-                                    </select>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        {% if not tickets %}
-                        <tr>
-                            <td colspan="8" style="text-align: center;">No tickets found matching these filters.</td>
-                        </tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+            <div class="card progress">
+                <h3>In Progress</h3>
+                <div class="count status-orange">{{ progress }}</div>
+            </div>
+
+            <div class="card resolved">
+                <h3>Resolved</h3>
+                <div class="count status-green">{{ resolved }}</div>
             </div>
         </div>
-    </body>
-</html>
+
+        <div class="dashboard-filter-section">
+            <form action="{{ url_for('admin_dashboard') }}" method="GET" class="filter-form">
+                <select name="status" class="filter-select">
+                    <option value="">Status: All</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+
+                <select name="category" class="filter-select">
+                    <option value="">Category: All</option>
+                    <option value="Network">Network</option>
+                    <option value="Hardware">Hardware</option>
+                    <option value="Software">Software</option>
+                    <option value="Access">Access</option>
+                </select>
+
+                <select name="priority" class="filter-select">
+                    <option value="">Priority: All</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+
+                <button type="submit" class="btn-filter-tickets">Apply Filter</button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn-reset">Reset</a>
+            </form>
+        </div>
+
+        <div class="Ticket-table">
+            <table class="ticket-table">
+                <thead>
+                    <tr>
+                        <th>Serial Number</th>
+                        <th>Email</th>
+                        <th>Ticket Id</th>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ ticket.email }}</td>
+                        <td>{{ ticket.id }}</td>
+                        <td>{{ ticket.title }}</td>
+                        <td>{{ ticket.description }}</td>
+                        <td>{{ ticket.category }}</td>
+                        <td>{{ ticket.priority }}</td>
+                        <td>
+                            <form action="{{ url_for('update_ticket_status', ticket_id=ticket.id) }}" method="POST" style="display:inline;">
+                                <select name="new_status" onchange="this.form.submit()" class="status-dropdown status-{{ ticket.status|lower|replace(' ', '-') }}">
+                                    <option value="{{ ticket.status }}" selected disabled>{{ ticket.status }}</option>
+                                    {% if ticket.status != 'Open' %}<option value="Open">Open</option>{% endif %}
+                                    {% if ticket.status != 'In Progress' %}<option value="In Progress">In Progress</option>{% endif %}
+                                    {% if ticket.status != 'Resolved' %}<option value="Resolved">Resolved</option>{% endif %}
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not tickets %}
+                    <tr>
+                        <td colspan="8" style="text-align: center;">No tickets found matching these filters.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
