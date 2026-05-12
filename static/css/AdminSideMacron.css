@@ -1,17 +1,18 @@
 body {
     margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
 
 }
 
 .sidebar {
-    width: 250px;
+    width: 240px;
     height: 100vh;
     background-color: white; 
-    border-right: 1px solid #adabab; 
+    border-right: 1px solid #e5e7eb; 
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 10px;
     box-sizing: border-box; 
     box-sizing: border-box;
     position:fixed;
@@ -19,79 +20,119 @@ body {
 }
 
 .brand-header{
-    border-bottom:1px solid #888;
-
-
+    border-bottom:1px solid #e5e7eb;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap:14px;
-    margin:0 -20px 30px -20px;
-    padding: 0 20px 20px 20px;
+    gap:12px;
+    margin:0 -10px 14px -10px;
+    padding: 0 10px 10px 10px;
 
 
 }
 
 .brand-header i{
-    font-size:40px;
-    color:#000000;
+    font-size:20px;
+    background-color: #000000;
+    color: white;
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
 }
 
 .brand-header h2{
     margin:0;
-    font-size: 1.1rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #000000;
 }
 
 .brand-header p{
-    margin:0.2rem;
-    font-size:0.9rem;
-    color: #888;
+    margin: 0.2rem;
+    font-size:0.75rem;
+    color: #767b86;
+    font-weight: 500;
 
 }
 
 
 .badge {
-    margin-left: auto; 
+     
     background-color: #fee2e2; 
     color: #ef4444; 
-    font-size: 0.75rem;
-    font-weight: bold;
-    padding: 2px 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
     border-radius: 10px;
+    margin-left: 100px;
+   
+   
+    margin: auto;
+
+    
+    
+    
 }
 
 .nav-group{
-    
+    margin-top: 0px;
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
 }
 
 .label{
-    font-size:0.95rem;
-    color:#888;
-    letter-spacing: 1px;
-    padding-left: 12px;
+    font-size:0.7rem;
+    font-weight: 550;
+    color:#9ca3af;;
+    letter-spacing: 0.5px;
+    padding-left: 6px;
+    margin-bottom: 4px;
 }
 
 
 .nav-item{
     display: flex;
     align-items: center;
-    gap:12px;
+    gap:10px;
     text-decoration: none;
-    color: #5c5c5c;
-    padding: 10px 12px; /*10px top bottom , left and right*/
-    border-radius: 8px;
+    color: #66686a;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 8px 8px;
+    border-radius: 6px;
+    margin-bottom: 0.5px;
     transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+    
 
 }
 
+
 .nav-item:hover{
-    background-color: #dcd9d9;
+    background-color:#e1e1e16d;
     color: #000000;
 
 }
+
+.nav-item.active {
+    background-color:white;
+    color: #000000;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border: 1px solid #767b86;
+}
+
+
+.nav-item.active i{
+    color: #000000;
+}
+
+
 
 .admin-profile{
     margin-top: auto;
@@ -102,22 +143,21 @@ body {
     padding-top: 20px;
     border-top:1px solid #eee;
     text-decoration: none;
-    gap:12px;
-    margin-left: -20px;
-    margin-right: -20px;
-    padding: 20px 20px 0 20px;
- 
-    border-top:1px solid #888;
+    gap:8px;
+    margin-left: -10px;
+    margin-right: -10px;
+    padding: 14px 14px 0 14px;
+    border-top:1px solid #e5e7eb;
 }
  
 
 
 .logout-btn{
 
-    padding:5px;
+    padding:4px;
     text-decoration: none;
-    font-size: 1.5rem;
-    color: #888;
+    font-size: 1.20rem;
+    color: #9ca3af;
     transition: all 0.2s;
 
 
@@ -129,16 +169,18 @@ body {
 }
 
 .user-avatar{
-    width:36px;
-    height:36px;
-    background-color: rgb(202, 233, 244);
-    color: black;
+    width:32px;
+    height:32px;
+    background-color: rgb(221, 245, 254);
+    color:rgb(6, 36, 158);
     border-radius: 50%;
     align-items: center;
     display: flex;
     justify-content: center;
-    font-size: 1.2rem ;
+    font-size: 0.8rem ;
+    font-weight: 600;
     flex-shrink: 0;
+
 }
 
 .user-meta{
@@ -147,27 +189,39 @@ body {
 
 
 .user-meta h2{
-    font-size:1rem;
-    font-weight:600;
-    margin: 0;
+    margin:0;
+    font-size: 0.85rem;
+    font-weight: 550;
     color: #000000;
-    align-items: center;
 
 }
 
 .user-meta p{
-    font-size:0.9rem;
-    margin:0;
-    color: #888;
-    margin-top: 0.2rem;
+    margin: 0.2rem;
+    font-size:0.75rem;
+    color: #767b86;
+    font-weight: 500;
     align-items: center;
 
 }
 
+/*This is style for employee side base file*/
 
-.nav-item.active {
-    background-color: #f3f4f6;
-    color: #000000;
-    font-weight: 600;
+.my-tickets{
+    color: red;
+    padding: 2px 2px;
+    border-radius: 8px;
+    border: 1px solid red;
+    background-color: rgb(244, 213, 155);
+    font-size: 12px;
+    margin-right: 0px;
+    width: 25px;
+    display: flex;
+    justify-content: center;
+    margin-left:185px;
+    margin-top: -39px;
 }
 
+.nav-group-emp{
+    margin-top: 18px;
+}

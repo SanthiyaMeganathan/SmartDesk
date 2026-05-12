@@ -1,0 +1,161 @@
+<div class="Four-Box">
+    <div class="Total">
+        <p>Total Tickets</p>
+        <span class="Numerical_total_ticket" >{Total}</span>
+        <span class="Ticket-last-week-count">{Ticket_within_week}</span>
+
+    </div>
+    <div class="Open">
+        <p>open</p>
+        <span class="Numerical_total_ticket" >{open}</span>
+        <span class="Percentage-of-open">{Tickets_open}</span>
+
+    </div>
+    <div class="InProgress">
+        <p>In progress</p>
+        <span class="Numerical_total_ticket" >{InProgress}</span>
+        <span class="percentage-of-progress">{Tickey_percentage_progress}</span>
+
+    </div>
+    <div class="Resolved">
+        <p>Resolved</p>
+        <span class="Numerical_total_ticket" >{Resolved}</span>
+        <span class="Avg-days-to-resolved">{Avg_days}</span>
+
+    </div>
+
+</div>
+
+style:
+
+.four box{
+    display:flex;
+    flex direction:r0w;
+}
+
+<div class="bottom-two-box">
+
+    //recebt tickets:
+<div>
+
+</div>
+
+
+
+<div class="showing-recent-tickets">
+
+    <div class="all-tickets-header">
+        <h2 class="text-rect-tickets">
+            <i class="icon-recent-tickets"></i>
+            Recent tickets
+        </h2>
+
+        <a href="#">View all <i class="here we arow mark symbol"></i></a>
+
+    </div>
+
+    <div>
+        <div class="ticket-id">
+            {show ticket-id}
+        </div>
+
+        <div class="ticket-title">
+            <h2>{ticket-title-get-from-backend}</h2>
+        </div>
+
+        <div class="priority ">
+
+            for high ->red colou , for Med ->orange colour , for low ->green color
+            {get_priority}
+        </div>
+
+        <div class="time-created">
+            {time_created}
+        </div>
+    </div>
+
+     
+</div>
+
+//ticket by category:
+
+<div>
+
+    <div class="header-category">
+        <div class="category">
+            <i="categroy-symbol-bar-chart"></i>
+            <h2>Tickets by Category</h2>
+        </div>
+
+        <div class ="Analytics">
+            <a href="#">Analytics <i="arrow-mark-symbol"></i></a>
+
+        </div>
+
+    </div>
+
+    for this div we will draw a line : after this
+
+    <div class="four-category">
+        <div class="Title">
+            <h3 class="Title-name">Network</h3>
+            <h4 class="bar blue-bar">That bar, that shoudl get filled in blue colur based o the pecetneg and by defult it should be grey , backforund grey</h4>
+            <p class="network_issues">{network iss , now we can mock up.</p>
+        </div>
+
+        <div class="Title">
+            <h3 class="Title-name">Access</h3>
+            <h4 class="bar mustardorange-bar">That bar, that shoudl get filled in blue colur based o the pecetneg and by defult it should be grey , backforund grey</h4>
+            <p class="Access-issue">{access  iss , now we can mock up.</p>
+        </div>
+
+        <div class="Title">
+            <h3 class="Title-name">Software</h3>
+            <h4 class="bar red-bar">That bar, that shoudl get filled in blue colur based o the pecetneg and by defult it should be grey , backforund grey</h4>
+            <p class="software-issue">{softwrae iss , now we can mock up.</p>
+        </div>
+
+        <div class="Title">
+            <h3 class="Title-name">Hardware</h3>
+            <h4 class="bar green-bar">That bar, that shoudl get filled in blue colur based o the pecetneg and by defult it should be grey , backforund grey</h4>
+            <p class="hardware-issue">{hardware iss , now we can mock up.</p>
+        </div>
+
+    </div>
+
+    after this div we need to draw a line 
+
+    <div class="Status-breakdown">
+
+        <div class="status-header">
+            <h2 class="status-breakdown-texr">Status breakdown</h2>
+        </div>
+
+        <div class="open-class">
+            
+            <h2 class="open_count">{{open_count}}</h2>
+            <p class="text">Open</p>
+
+        </div>
+
+        <div class="In-Progress-class">
+
+            <h2 class="In_Progress_count">{{In_Progress_count}}</h2>
+            <p class="text">In Progress</p>
+
+        </div>
+
+        <div>
+
+            <h2 class="Resolved_count">{{Resolved_count}}</h2>
+            <p class="text">Resolved</p>
+
+        </div>
+
+
+
+    </div>
+
+</div>
+
+</div>

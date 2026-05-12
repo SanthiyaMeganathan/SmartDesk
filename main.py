@@ -10,6 +10,7 @@ import json
 import re
 from datetime import datetime, timedelta
 
+
 app = Flask(__name__)
 app.secret_key = 'my_secret_key'
 
@@ -38,7 +39,7 @@ class Ticket(db.Model):
     category = db.Column(db.String(50), nullable=False)
     priority = db.Column(db.String(20), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='Open')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     proceeding_started = db.Column(db.DateTime, nullable=True)
     resolved_at = db.Column(db.DateTime, nullable=True)
 
@@ -186,7 +187,6 @@ def logout():
         flash("You have been logged out of the Employee portal.")
         return redirect(url_for('employee_login'))
 
-from datetime import datetime, timedelta
 
 @app.route("/admin-dashboard")
 def admin_dashboard():    
@@ -217,7 +217,7 @@ def admin_dashboard():
     global_resolved = Ticket.query.filter_by(status='Resolved').count()
 
    
-    seven_days_ago = datetime.utcnow() - timedelta(days=7)
+    seven_days_ago = datetime.now() - timedelta(days=7)
     recent_raised_count = Ticket.query.filter(Ticket.created_at >= seven_days_ago).count()
 
   
@@ -277,7 +277,7 @@ def admin_dashboard():
 def update_ticket_status(ticket_id):
     new_status = request.form.get('new_status')
     ticket = Ticket.query.get_or_404(ticket_id)
-    now = datetime.utcnow()
+    now = datetime.now()
     
     if new_status in ['Open', 'In Progress', 'Resolved']:
         # 1. Resetting Logic (Moving Backwards)
@@ -443,7 +443,11 @@ def submit_ticket_gui():
     
 @app.route('/admin-side-macron')
 def adminSideMacron():
-    return render_template("AdminSideMacron.html")    
+    return render_template("AdminSideMacron.html")  
+
+@app.route('/employee-side-base')
+def employeeSideBase():
+    return render_template("EmployeeSideBase.html")    
 
 if __name__ == "__main__":
     app.run(debug=True)    

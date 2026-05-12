@@ -1,46 +1,45 @@
 <!Doctype html>
 <html>
-    <head>
-        <title>Admin - Ticket Summary</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminDashBoard.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminSummary.css') }}">
-    </head>
-    <body>
-        <div class="DashBoard-container">
-            <h2>Ticket Summary Overview</h2>
-            
-            <div class="summary-cards">
-            
-                <div class="card">
-                    <h3>Total Tickets</h3>
-                    <div class="count">{{ total }}</div>
-                </div>
 
-           
-                <div class="card open">
-                    <h3>Open</h3>
-                    <div class="count status-red">{{ open }}</div>
-                </div>
+<head>
+    <title>Admin - Ticket Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminDashBoard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminSummary.css') }}">
+</head>
 
-           
-                <div class="card progress">
-                    <h3>In Progress</h3>
-                    <div class="count status-orange">{{ progress }}</div>
-                </div>
+<body>
+    <div class="DashBoard-container">
+        <h2>Ticket Summary Overview</h2>
 
-             
-                <div class="card resolved">
-                    <h3>Resolved</h3>
-                    <div class="count status-green">{{ resolved }}</div>
-                </div>
+        <div class="summary-cards">
+
+            <div class="card">
+                <h3>Total Tickets</h3>
+                <div class="count">{{ total }}</div>
             </div>
 
-     
-            <div class="back-container">
-                <button class="btn-filter-tickets" onclick="window.location.href='/admin-dashboard'">
-                    Back to Detailed View
-                </button>
+            <div class="card open">
+                <h3>Open</h3>
+                <div class="count status-red">{{ open }}</div>
+            </div>
+
+            <div class="card progress">
+                <h3>In Progress</h3>
+                <div class="count status-orange">{{ progress }}</div>
+            </div>
+
+            <div class="card resolved">
+                <h3>Resolved</h3>
+                <div class="count status-green">{{ resolved }}</div>
             </div>
         </div>
-    </body>
+
+        <div class="back-container">
+            <button class="btn-filter-tickets" onclick="window.location.href='/admin-dashboard'">
+                Back to Detailed View
+            </button>
+        </div>
+    </div>
+</body>
+
 </html>

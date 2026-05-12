@@ -18,47 +18,37 @@
                 <i class="ri-home-smile-line"></i>
                 <div>
                     <h2>SmartDesk</h2>
-                    <p>Admin Portal</p>
+                    <p>Employee Portal</p>
                 </div>
             </div>
         </div>
 
         <div class="nav-container">
             <div class="nav-group">
-                <span class="label">MAIN</span>
+                <span class="label">Support</span>
                 <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
                     <i class="ri-dashboard-line"></i>
-                    DashBoard
+                    My Tickets
                 </a>
                 <a href="#" class="nav-item">
                     <i class="ri-coupon-2-line"></i>
-                    All Tickets
-                    <span class="badge">{{ total }}</span>
+                    IT Support Chat  
                 </a>
             </div>
+            <div class="my-tickets">20</div>
 
-            <div class="nav-group">
-                <span class="label">REPORTS</span>
+            <div class="nav-group-emp">
+                <span class="label">Resources</span>
                 <a href="#" class="nav-item">
                     <i class="ri-bar-chart-2-line"></i>
-                    Analytics
+                    It Knowledge Base
                 </a>
                 <a href="#" class="nav-item">
                     <i class="ri-export-line"></i>
-                    Export
+                    FAQ
                 </a>
             </div>
 
-            <div class="nav-group">
-                <span class="label">CONFIG</span>
-                <a href="#" class="nav-item">
-                    <i class="ri-stack-line"></i> Categories
-                </a>
-                <a href="#" class="nav-item">
-                    <i class="ri-settings-2-line"></i>
-                    Settings
-                </a>
-            </div>
         </div>
 
         <div class="admin-profile">
@@ -67,8 +57,8 @@
             </div>
 
             <div class="user-meta">
-                <h2>Admin User</h2>
-                <p>IT Admin</p>
+                <h2>Employee Name</h2>
+                <p>employee@gmail.com</p>
             </div>
 
             <a href="{{ url_for('logout') }}" class="logout-btn">

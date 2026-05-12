@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,10 +8,11 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/EmployeeDashBoard.css') }}">
 </head>
+
 <body>
     <div class="container">
         <header>
-           
+
             <button type="button" class="btn-logout" onclick="window.location.href='/logout'" style="float: right;">
                 Logout
             </button>
@@ -19,7 +21,7 @@
         </header>
 
         <div class="Employee-Dashboard-Page">
-      
+
             <div class="dashboard-actions">
                 <button type="button" class="btn-raise-ticket" onclick="window.location.href='/chat-bot'">
                     Raise Ticket
@@ -49,7 +51,9 @@
                             <td>{{ ticket.description }}</td>
                             <td>{{ ticket.category }}</td>
                             <td>{{ ticket.priority }}</td>
-                            <td><span class="status-{{ ticket.status|lower|replace(' ', '-') }}">{{ ticket.status }}</span></td>
+                            <td><span
+                                    class="status-{{ ticket.status|lower|replace(' ', '-') }}">{{ ticket.status }}</span>
+                            </td>
                         </tr>
                         {%- endfor -%}
                     </tbody>
@@ -58,4 +62,5 @@
         </div>
     </div>
 </body>
+
 </html>
