@@ -59,23 +59,7 @@ body {
 }
 
 
-.badge {
-     
-    background-color: #fee2e2; 
-    color: #ef4444; 
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 10px;
-    margin-left: 100px;
-   
-   
-    margin: auto;
 
-    
-    
-    
-}
 
 .nav-group{
     margin-top: 0px;
@@ -208,11 +192,12 @@ body {
 /*This is style for employee side base file*/
 
 .my-tickets{
-    color: red;
-    padding: 2px 2px;
-    border-radius: 8px;
-    border: 1px solid red;
-    background-color: rgb(244, 213, 155);
+    background-color: #fee2e2; 
+    color: #ef4444; 
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
     font-size: 12px;
     margin-right: 0px;
     width: 25px;
@@ -225,3 +210,52 @@ body {
 .nav-group-emp{
     margin-top: 18px;
 }
+
+/*restyle the badge of the amdin side base*/
+
+
+.badge{
+    background-color: #fee2e2; 
+    color: #ef4444; 
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-right: 0px;
+    width: 50px;
+    display: flex;
+    justify-content: center;
+    margin-left:1850px;
+    margin-top: -39px;
+} /*This Works for badges containing high,low,med*/
+
+.badge-ticket{
+    color: red;
+    padding: 2px 6px;
+    background-color:#fee2e2; 
+    margin-top: 0px;
+    border-radius: 10px;
+    margin-left: 185px;
+    font-size: 0.7rem;
+    margin-top: -39px;
+    font-weight: 600;
+    width: 25px;
+    display: flex;
+    justify-content: center;
+
+
+}
+
+/*since we styled the ticket seprltly ,
+the div below it ,
+like reports , collid with it .. 
+so for that div only we style sperlt , defore that we styled with nav-items
+ */
+
+ .nav-group-report{
+    margin-top: 10px;
+    margin-bottom: 1px;
+ 
+ }
+
