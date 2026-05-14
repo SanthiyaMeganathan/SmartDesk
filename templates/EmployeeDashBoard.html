@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="dashboard-wrapper">
-    <!-- Top Header Section -->
+    
     <div class="dash-header">
         <div class="dash-title">
             <h2>My Tickets</h2>
@@ -24,37 +24,35 @@
         </div>
     </div>
 
-    <!-- Four Stat Boxes -->
     <div class="four-box-container">
         <div class="stat-box">
             <div class="stat-title"><i class="ri-coupon-2-line"></i><p>My tickets</p></div>
-            <!-- You can pass a 'total_tickets' variable from Flask, using 5 as a placeholder based on your image -->
             <span class="numerical-value">5</span>
             <span class="stat-subtext">All time</span>
         </div>
 
         <div class="stat-box">
-            <div class="stat-title"><i class="ri-time-line text-red"></i><p>Open</p></div>
+            <div class="stat-title"><i class="ri-time-line"></i><p>Open</p></div>
             <span class="numerical-value text-red">2</span>
             <span class="stat-subtext">Awaiting resolution</span>
         </div>
 
         <div class="stat-box">
-            <div class="stat-title"><i class="ri-donut-chart-line text-orange"></i><p>In progress</p></div>
+            <div class="stat-title"><i class="ri-donut-chart-line"></i><p>In progress</p></div>
             <span class="numerical-value text-orange">1</span>
             <span class="stat-subtext">Being worked on</span>
         </div>
 
         <div class="stat-box">
-            <div class="stat-title"><i class="ri-checkbox-circle-line text-green"></i><p>Resolved</p></div>
+            <div class="stat-title"><i class="ri-checkbox-circle-line"></i><p>Resolved</p></div>
             <span class="numerical-value text-green">2</span>
             <span class="stat-subtext">Closed tickets</span>
         </div>
     </div>
 
-    <!-- Main Content Area -->
+    
     <div class="main-content-container">
-        <!-- Filters -->
+        
         <div class="filter-section">
             <div class="filter-group">
                 <select>
@@ -82,55 +80,57 @@
             </div>
         </div>
 
-        <!-- Ticket Table -->
+   
         <div class="table-container">
-            <!-- NEW SCROLL WRAPPER -->
-            <div class="table-scroll">
-                <table class="emp-ticket-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Title</th>
-                            <th>Category</th>
-                            <th>Priority</th>
-                            <th>Status</th>
-                            <th>Raised on</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ticket in tickets %}
-                        <tr>
-                            <td class="t-id">T-{{ "%03d" | format(ticket.id) }}</td>
-                            <td class="t-title-col">
-                                <div class="t-title">{{ ticket.title }}</div>
-                                <div class="t-desc">{{ ticket.description }}</div>
-                            </td>
-                            <td><span class="cat-badge">{{ ticket.category }}</span></td>
-                            <td>
-                                {% if ticket.priority|lower == 'high' %}
-                                    <span class="priority p-high"><i class="ri-arrow-up-line"></i> High</span>
-                                {% elif ticket.priority|lower == 'medium' %}
-                                    <span class="priority p-med"><i class="ri-subtract-line"></i> Medium</span>
-                                {% else %}
-                                    <span class="priority p-low"><i class="ri-arrow-down-line"></i> Low</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="status-badge s-{{ ticket.status|lower|replace(' ', '-') }}">{{ ticket.status }}</span>
-                            </td>
-                            <td class="t-date">
-                                <!-- Fallback to a hardcoded date if your ticket object doesn't have created_at yet -->
-                                {{ ticket.created_at.strftime('%d %b') if ticket.created_at else '7 May' }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div> <!-- END SCROLL WRAPPER -->
+            <table class="emp-ticket-table">
+                <thead>
+                    <tr>
+                        <th width="8%">#</th>
+                        <th width="42%">Title</th>
+                        <th width="15%">Category</th>
+                        <th width="15%">Priority</th>
+                        <th width="10%">Status</th>
+                        <th width="10%">Raised on</th>
+                    </tr>
+                </thead>
+                <tbody class="table-body">
+                  
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td class="t-id">T-{{ "%03d" | format(ticket.id) }}</td>
+                        <td class="t-title-col">
+                            <div class="t-title">{{ ticket.title }}</div>
+                            <div class="t-desc">{{ ticket.description }}</div>
+                        </td>
+                        <td>
+                          
+                            <span class="cat-badge cat-{{ ticket.category|lower|replace(' ', '-') }}">
+                                {{ ticket.category }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if ticket.priority|lower == 'high' %}
+                                <span class="priority p-high"><i class="ri-arrow-up-line"></i> High</span>
+                            {% elif ticket.priority|lower == 'medium' %}
+                                <span class="priority p-med"><i class="ri-subtract-line"></i> Medium</span>
+                            {% else %}
+                                <span class="priority p-low"><i class="ri-arrow-down-line"></i> Low</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge s-{{ ticket.status|lower|replace(' ', '-') }}">{{ ticket.status }}</span>
+                        </td>
+                        <td class="t-date">
+                         
+                            {{ ticket.created_at.strftime('%d %b') if ticket.created_at else '7 May' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-            <!-- Pagination stays outside the scroll wrapper so it locks to the bottom -->
             <div class="pagination-footer">
-                <span class="page-info">Showing 1-{{ tickets|length }} of {{ tickets|length }} tickets</span>
+                <span class="page-info">Showing 1–{{ tickets|length }} of 5 tickets</span>
                 <div class="page-controls">
                     <button class="page-btn"><i class="ri-arrow-left-s-line"></i></button>
                     <button class="page-btn active">1</button>

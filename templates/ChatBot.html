@@ -1,28 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "employeesidebase.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Bot</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/ChatBot.css') }}">
-</head>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ChatBot.css') }}">
+{% endblock %}
 
-<body>
-
-    <div class="chat-container">
-        <h2>IT Support Bot</h2>
-
-        <div class="chat-box" id="chat-box">
-        </div>
-
-        <div class="chat-input-area">
-            <input type="text" id="user-input" placeholder="Type your message here..." />
-            <button id="send-btn">Send</button>
+{% block content %}
+<div class="chat-main-wrapper">
+    <div class="chat-header">
+        <div class="bot-info">
+            <i class="ri-robot-line"></i>
+            <div>
+                <h2>IT Support Bot</h2>
+                <p><span class="status-dot"></span> Online · SmartDesk</p>
+            </div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/ChatBot.js') }}"></script>
-</body>
+    <div class="chat-box" id="chat-box">
+        <!-- Messages will appear here -->
+    </div>
 
-</html>
+    <div class="chat-input-container">
+        <div class="chat-input-area">
+            <i class="ri-attachment-2"></i>
+            <input type="text" id="user-input" placeholder="Type your message here..." />
+            <button id="send-btn">
+                <i class="ri-send-plane-2-fill"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/ChatBot.js') }}"></script>
+{% endblock %}
