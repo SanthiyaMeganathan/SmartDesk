@@ -62,7 +62,7 @@ body {
 }
 
 .nav-group-emp {
-    margin-top: 18px;
+    margin-top: 54px;
 }
 
 .label {
@@ -107,19 +107,19 @@ body {
     color: #000000;
 }
 
+
+
 .my-tickets {
     background-color: #fee2e2; 
     color: #ef4444; 
     font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 12px;
-    margin-right: 0px;
-    width: 25px;
+    padding: 2px 8px; 
+    border-radius: 12px;
+    font-size: 0.75rem;
     display: flex;
     justify-content: center;
-    margin-left: 185px;
-    margin-top: -39px;
+    align-items: center;
+    min-width: 30px; 
 }
 
 .admin-profile {

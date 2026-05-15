@@ -27,30 +27,29 @@
     <div class="four-box-container">
         <div class="stat-box">
             <div class="stat-title"><i class="ri-coupon-2-line"></i><p>My tickets</p></div>
-            <span class="numerical-value">5</span>
+            <span class="numerical-value">{{ tickets | length }}</span>
             <span class="stat-subtext">All time</span>
         </div>
 
         <div class="stat-box">
             <div class="stat-title"><i class="ri-time-line"></i><p>Open</p></div>
-            <span class="numerical-value text-red">2</span>
+            <span class="numerical-value text-red">{{open_count}}</span>
             <span class="stat-subtext">Awaiting resolution</span>
         </div>
 
         <div class="stat-box">
             <div class="stat-title"><i class="ri-donut-chart-line"></i><p>In progress</p></div>
-            <span class="numerical-value text-orange">1</span>
+            <span class="numerical-value text-orange">{{in_progress_count}}</span>
             <span class="stat-subtext">Being worked on</span>
         </div>
 
         <div class="stat-box">
             <div class="stat-title"><i class="ri-checkbox-circle-line"></i><p>Resolved</p></div>
-            <span class="numerical-value text-green">2</span>
+            <span class="numerical-value text-green">{{closed_count}}</span>
             <span class="stat-subtext">Closed tickets</span>
         </div>
     </div>
 
-    
     <div class="main-content-container">
         
         <div class="filter-section">
@@ -80,7 +79,6 @@
             </div>
         </div>
 
-   
         <div class="table-container">
             <table class="emp-ticket-table">
                 <thead>
@@ -95,15 +93,14 @@
                 </thead>
                 <tbody class="table-body">
                   
-                    {% for ticket in tickets %}
-                    <tr>
+                    {% for ticket in tickets | reverse %}
+                    <tr class="ticket-row">
                         <td class="t-id">T-{{ "%03d" | format(ticket.id) }}</td>
                         <td class="t-title-col">
                             <div class="t-title">{{ ticket.title }}</div>
                             <div class="t-desc">{{ ticket.description }}</div>
                         </td>
                         <td>
-                          
                             <span class="cat-badge cat-{{ ticket.category|lower|replace(' ', '-') }}">
                                 {{ ticket.category }}
                             </span>
@@ -121,7 +118,6 @@
                             <span class="status-badge s-{{ ticket.status|lower|replace(' ', '-') }}">{{ ticket.status }}</span>
                         </td>
                         <td class="t-date">
-                         
                             {{ ticket.created_at.strftime('%d %b') if ticket.created_at else '7 May' }}
                         </td>
                     </tr>
@@ -130,14 +126,17 @@
             </table>
 
             <div class="pagination-footer">
-                <span class="page-info">Showing 1–{{ tickets|length }} of 5 tickets</span>
+                <span class="page-info" id="pagination-info">Showing tickets</span>
                 <div class="page-controls">
-                    <button class="page-btn"><i class="ri-arrow-left-s-line"></i></button>
-                    <button class="page-btn active">1</button>
-                    <button class="page-btn"><i class="ri-arrow-right-s-line"></i></button>
+                    <button class="page-btn" id="prev-btn" onclick="changePage(-1)"><i class="ri-arrow-left-s-line"></i></button>
+                    <button class="page-btn active" id="current-page-btn">1</button>
+                    <button class="page-btn" id="next-btn" onclick="changePage(1)"><i class="ri-arrow-right-s-line"></i></button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="{{ url_for('static', filename='js/EmployeeDashBoard.js') }}"></script>
+
 {% endblock %}

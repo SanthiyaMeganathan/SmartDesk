@@ -25,20 +25,21 @@
 
         <div class="nav-container">
             <div class="nav-group">
-                <span class="label">Support</span>
-                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
-                    <i class="ri-dashboard-line"></i>
-                    My Tickets
-                </a>
-                <a href="{{ url_for('render_chatbot') }}" class="nav-item">
-                    <i class="ri-coupon-2-line"></i>
-                    IT Support Chat  
-                </a>
-            </div>
+            <span class="label">Support</span>
             
-            <div class="my-tickets">20</div>
+            <a href="{{ url_for('employee_dashboard') }}" class="nav-item">
+                <i class="ri-dashboard-line"></i>
+                <span style="flex: 1;">My Tickets</span>
+                <div class="my-tickets">{{ tickets | length if tickets else 0 }}</div>
+            </a>
+            
+            <a href="{{ url_for('render_chatbot') }}" class="nav-item">
+                <i class="ri-coupon-2-line"></i>
+                <span>IT Support Chat</span>  
+            </a>
+        </div>
 
-            <div class="nav-group-emp">
+            <div class="nav-group">
                 <span class="label">Resources</span>
                 <a href="#" class="nav-item">
                     <i class="ri-bar-chart-2-line"></i>
@@ -58,8 +59,8 @@
             </div>
 
             <div class="user-meta">
-                <h2>Employee Name</h2>
-                <p>employee@gmail.com</p>
+                <h2>{{ session['email'].split('@')[0] | capitalize }}</h2>
+                <p>{{ session['email'] }}</p>
             </div>
 
             <a href="{{ url_for('logout') }}" class="logout-btn">

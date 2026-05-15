@@ -224,19 +224,22 @@ html , body {
 }
 
 .table-container {
-    flex:1;
     background-color: rgb(255, 255, 255);
     border: 1px solid #e5e7eb; 
     border-radius: 8px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    padding:20px,2000px;
     overflow: hidden;
     margin-top: -10px;
     margin-left: -6px;
     margin-right: -6px;
+}
 
+/* MINION FIX: Makes buttons look unclickable when there are no more pages */
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: #f9fafb;
 }
 
 .emp-ticket-table {
@@ -340,7 +343,6 @@ html , body {
 .cat-hardware { background-color: #fef3c7; color: #d97706; }
 
 
-
 .pagination-footer {
     display: flex;
     justify-content: space-between;
@@ -348,7 +350,8 @@ html , body {
     padding: 6px 20px;
     border-top: 1px solid #e5e7eb;
     background-color: white;
-    border-radius: 0 0 8px 8px; /* Round bottom corners */
+    border-radius: 0 0 8px 8px;
+    margin-top: auto; 
 }
 
 .page-info {

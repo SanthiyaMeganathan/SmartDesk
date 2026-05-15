@@ -1,6 +1,6 @@
 import uuid
 import requests
-from datetime import datetime
+from datetime import datetime, date, timedelta  # <-- MINION FIX: All 3 are here now!
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,7 +8,6 @@ import chromadb
 from chromadb.utils import embedding_functions
 import json
 import re
-from datetime import datetime, timedelta
 
 
 app = Flask(__name__)
@@ -165,21 +164,56 @@ def employee_dashboard():
     
     user_email = session['email']
     my_tickets = Ticket.query.filter_by(email=user_email).all()
-    return render_template('EmployeeDashboard.html', tickets=my_tickets)
+    open_count=sum(1 for ticket in my_tickets if ticket.status== 'Open')
+    in_progress_count=sum(1 for ticket in my_tickets if ticket.status== 'In Progress')
+    closed_count=sum(1 for ticket in my_tickets if ticket.status== ['Closed','Resolved'])
+    return render_template(
+        'EmployeeDashboard.html', 
+        tickets=my_tickets,
+        open_count=open_count,
+        in_progress_count=in_progress_count,
+        closed_count=closed_count
+        )
+
+
+
 
 
 @app.route('/chat-bot')
 def render_chatbot():
     if 'email' not in session:
         return redirect(url_for('employee_login'))
-    return render_template('ChatBot.html')
+    
+    user_email = session['email']
+    my_tickets = Ticket.query.filter_by(email=user_email).order_by(Ticket.created_at.desc()).all()
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    tickets_today = []
+    tickets_yesterday = []
+    tickets_earlier = []
+
+    for ticket in my_tickets:
+        ticket_date = ticket.created_at.date()
+        if ticket_date == today:
+            tickets_today.append(ticket)
+        elif ticket_date == yesterday:
+            tickets_yesterday.append(ticket)
+        else:
+            tickets_earlier.append(ticket)
+ 
+    return render_template(
+        'ChatBot.html', 
+        tickets=my_tickets,
+        
+        tickets_today=tickets_today,
+        tickets_yesterday=tickets_yesterday,
+        tickets_earlier=tickets_earlier
+    )
 
 @app.route('/logout')
 def logout():
-    role = session.get('role')
-    
-    session.clear()
-    
+    role = session.get('role')  
+    session.clear()  
     if role == 'admin':
         flash("You have been logged out of the Admin portal.")
         return redirect(url_for('admin_login'))
@@ -192,12 +226,11 @@ def logout():
 def admin_dashboard():    
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
-
-  
+    
     status_filter = request.args.get('status')
     category_filter = request.args.get('category')
     priority_filter = request.args.get('priority')
-
+    
     query = Ticket.query
 
     if status_filter:
@@ -206,32 +239,27 @@ def admin_dashboard():
         query = query.filter(Ticket.category == category_filter)
     if priority_filter:
         query = query.filter(Ticket.priority == priority_filter)
-
-  
+        
     filtered_tickets = query.all()
-
-
+    
     global_total = Ticket.query.count()
     global_open = Ticket.query.filter_by(status='Open').count()
     global_progress = Ticket.query.filter_by(status='In Progress').count()
     global_resolved = Ticket.query.filter_by(status='Resolved').count()
 
-   
     seven_days_ago = datetime.now() - timedelta(days=7)
     recent_raised_count = Ticket.query.filter(Ticket.created_at >= seven_days_ago).count()
-
   
     open_pct = round((global_open / global_total * 100), 1) if global_total > 0 else 0
     progress_pct = round((global_progress / global_total * 100), 1) if global_total > 0 else 0
 
-  
     categories_to_track = [
         ('Network', 'network'),
         ('Software', 'software'),
         ('Hardware', 'hardware'),
         ('Access', 'access')
     ]
-    
+      
     cat_analytics = {}
     for display_name, key in categories_to_track:
         count = Ticket.query.filter_by(category=display_name).count()
@@ -240,7 +268,6 @@ def admin_dashboard():
             'count': count,
             'pct': round(percentage, 1)
         }
-
    
     resolved_list = Ticket.query.filter(Ticket.status == 'Resolved', Ticket.resolved_at != None).all()
     if resolved_list:
@@ -251,24 +278,19 @@ def admin_dashboard():
     else:
         avg_res_time = "0.0 days"
 
-
     top_five = Ticket.query.order_by(Ticket.created_at.desc()).limit(5).all()
 
-  
     return render_template (
         "AdminDashBoard.html",
-        # Global Counts
         total=global_total,
         open=global_open,
         progress=global_progress,
         resolved=global_resolved,
-        # Analytical data
         open_pct=open_pct,
         progress_pct=progress_pct,
         recent_count=recent_raised_count,
         avg_res_time=avg_res_time,
         cat_stats=cat_analytics,
-        # Lists for the UI
         tickets=filtered_tickets,  
         recent_tickets=top_five   )
     
@@ -280,23 +302,17 @@ def update_ticket_status(ticket_id):
     now = datetime.now()
     
     if new_status in ['Open', 'In Progress', 'Resolved']:
-        # 1. Resetting Logic (Moving Backwards)
+   
         if new_status == 'Open':
-            # Case: Resolved -> Open or Progress -> Open
             ticket.proceeding_started = None
             ticket.resolved_at = None
 
-        # 2. Progress Logic
         elif new_status == 'In Progress':
-            # Case: Open -> Progress or Resolved -> Progress
             ticket.proceeding_started = now
-            ticket.resolved_at = None # In case it was previously resolved
+            ticket.resolved_at = None 
 
-        # 3. Resolution Logic
         elif new_status == 'Resolved':
-            # Case: Open -> Resolved or Progress -> Resolved
             ticket.resolved_at = now
-            # Handle the "Skip Progress" edge case
             if not ticket.proceeding_started:
                 ticket.proceeding_started = now 
             
@@ -447,7 +463,16 @@ def adminSideMacron():
 
 @app.route('/employee-side-base')
 def employeeSideBase():
-    return render_template("EmployeeSideBase.html")    
+    if 'email' not in session:
+        return redirect(url_for('employee_login'))
+    
+    user_email = session['email']
+    my_tickets = Ticket.query.filter_by(email=user_email).all()
+    return render_template(
+        'EmployeeSidease.html', 
+        tickets=my_tickets,
+        )
+    
 
 if __name__ == "__main__":
     app.run(debug=True)    
