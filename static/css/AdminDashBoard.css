@@ -100,8 +100,12 @@ body {
 .four-box-container{
     display: flex;
     flex-direction: row;
-    gap: 16px;
-    padding: 20px 26px;
+    /* MODIFIED: Increased gap for equal spacing between columns */
+    gap: 24px; /* OLD VALUE: gap: 16px; */
+    
+    /* MODIFIED: Adjusted padding to align with header's 32px sides */
+    padding: 24px 32px; /* OLD VALUE: padding: 20px 26px; */
+    
     width: 100%;
     margin-top: -10px;
 }
@@ -160,26 +164,31 @@ body {
 
 .bottom-sections-container{
     display: flex;
-    gap: 16px;
-    padding: 0px 26px 26px 26px;
+    /* MODIFIED: Increased gap for equal spacing */
+    gap: 24px; /* OLD VALUE: gap: 16px; */
+    
+    
+    /* MODIFIED: Adjusted padding to align with header and row above */
+    padding: 0px 32px 32px 32px; /* OLD VALUE: padding: 0px 26px 26px 26px; */
+    
     width: 100%;
+    border-radius: 20%;
 }
 
 .recent-tickets-card{
     flex: 1;
     background-color: white;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 16px;
     padding: 20px;
     flex-direction: column;
-    
 }
 
 .analytics-card{
     flex: 1;
     background-color: white;
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: 16px;
     padding: 20px;
     flex-direction: column;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -249,7 +258,6 @@ body {
 
 .ticket-row:last-child {
     border-bottom: none;
-  
 }
 
 .ticket-id {
@@ -286,14 +294,12 @@ body {
     text-align: center;
 }
 
-
-
 .high-priority {
      background-color: #fee2e2; 
      color: #ef4444;
      justify-content: center; 
      margin-left: 2px;
-    }
+}
 .med-priority { background-color: #fef3c7; color: #d97706; }
 .low-priority { background-color: #d1fae5; color: #10b981; }
 
@@ -355,6 +361,9 @@ body {
     font-size: 0.85rem;
     color: #767b86; 
     font-weight: 500;
+    margin-top: 100px;
+    margin-bottom: 100px;
+    
 
 }
 
@@ -368,7 +377,8 @@ body {
 .s-card {
     flex: 1;
     padding: 12px 12px;
-    border-radius: 8px;
+    border-radius: 16px; 
+    
     text-align: center;
     display: flex;
     flex-direction: column;

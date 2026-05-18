@@ -3,11 +3,17 @@ const sendBtn = document.getElementById('send-btn');
 const chatDisplay = document.getElementById('chat-box');
 
 
+let activeSessionId = null;
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await createNewSession();
+});
+
 userInput.addEventListener('input', function() {
     this.style.height = 'auto'; 
     this.style.height = (this.scrollHeight) + 'px'; 
     
-   
     if(this.scrollHeight > 150) {
         this.style.overflowY = 'auto';
     } else {
@@ -17,7 +23,6 @@ userInput.addEventListener('input', function() {
 
 sendBtn.addEventListener('click', sendMessage);
 
-
 userInput.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault(); 
@@ -25,13 +30,77 @@ userInput.addEventListener('keydown', function (e) {
     }
 });
 
+
+async function createNewSession() {
+    chatDisplay.innerHTML = ''; 
+    
+    try {
+        const response = await fetch('/api/new-chat', { method: 'POST' });
+        const data = await response.json();
+        
+        activeSessionId = data.session_id; 
+        
+        const sessionInfoText = document.querySelector('.chat-session-info span');
+        if (sessionInfoText) {
+            sessionInfoText.textContent = `Session Active · New Chat`;
+        }
+    } catch (e) {
+        console.error("Error creating new chat: ", e);
+    }
+}
+
+
+document.getElementById('new-chat-btn').addEventListener('click', createNewSession);
+
+document.querySelectorAll('.history-item').forEach(item => {
+    item.addEventListener('click', async function() {
+        const sessionId = this.getAttribute('data-session-id');
+        
+        if (!sessionId || sessionId === "None") {
+            alert("No chat history was saved for this older ticket.");
+            return;
+        }
+
+       
+        activeSessionId = sessionId;
+
+        try {
+            const response = await fetch(`/api/chat-history/${activeSessionId}`);
+            const data = await response.json();
+
+            chatDisplay.innerHTML = '';
+
+    
+            data.history.forEach(msg => {
+
+                if (msg.sender === 'user' && msg.text === "") return;
+                
+                addMessageToChat(msg.sender, msg.text);
+                
+            
+                if (msg.sender === 'bot' && msg.show_form) {
+                    renderTicketForm(msg.show_form, msg.ticket_submitted);
+                }
+            });
+            
+            const sessionInfoText = document.querySelector('.chat-session-info span');
+            if (sessionInfoText) {
+               
+                sessionInfoText.textContent = `Archived Chat · History Loaded`;
+            }
+        } catch(e) {
+            console.error("Error fetching history: ", e);
+        }
+    });
+});
+
+
 async function sendMessage() {
     const userMessage = userInput.value.trim();
     if (userMessage === '') return;
 
     addMessageToChat('user', userMessage);
     
-
     userInput.value = '';
     userInput.style.height = 'auto'; 
 
@@ -39,7 +108,8 @@ async function sendMessage() {
         const response = await fetch('/chatbot', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userMessage })
+           
+            body: JSON.stringify({ message: userMessage, session_id: activeSessionId })
         });
 
         const data = await response.json();
@@ -47,7 +117,8 @@ async function sendMessage() {
         addMessageToChat('bot', data.response);
 
         if (data.show_form) {
-            renderTicketForm(data.show_form);
+          
+            renderTicketForm(data.show_form, false);
         }
 
     } catch (error) {
@@ -91,10 +162,30 @@ function addMessageToChat(sender, text) {
 }
 
 
-function renderTicketForm(formData) {
+
+function renderTicketForm(formData, isSubmitted = false) {
     const formContainer = document.createElement('div');
     formContainer.classList.add('gui-form-card');
-    formContainer.id = 'active-gui-form';
+    
+    formContainer.id = isSubmitted ? 'submitted-form-archived' : 'active-gui-form';
+
+    const disabledAttr = isSubmitted ? 'disabled' : '';
+
+    let buttonsHtml = '';
+    if (isSubmitted) {
+        buttonsHtml = `
+            <button class="btn-submit" disabled style="background-color: #e5e7eb; color: #374151; cursor: not-allowed;">
+                Ticket Submitted ✓
+            </button>
+        `;
+    } else {
+        buttonsHtml = `
+            <button id="gui-submit-btn" class="btn-submit" onclick="submitFinalTicket()">
+                <i class="ri-send-plane-fill"></i> Submit ticket
+            </button>
+            <button class="btn-discard" onclick="discardForm(this)">Discard</button>
+        `;
+    }
 
     formContainer.innerHTML = `
         <div class="gui-header">
@@ -106,16 +197,16 @@ function renderTicketForm(formData) {
         <div class="gui-body">
             <div class="gui-field">
                 <label>Title</label>
-                <input type="text" id="gui-title" value="${formData.title || ''}">
+                <input type="text" id="gui-title" value="${formData.title || ''}" ${disabledAttr}>
             </div>
             <div class="gui-field">
                 <label>Description</label>
-                <textarea id="gui-desc">${formData.description || ''}</textarea>
+                <textarea id="gui-desc" ${disabledAttr}>${formData.description || ''}</textarea>
             </div>
             <div class="gui-row">
                 <div class="gui-field">
                     <label>Category</label>
-                    <select id="gui-category">
+                    <select id="gui-category" ${disabledAttr}>
                         <option value="Network" ${formData.category === 'Network' ? 'selected' : ''}>Network</option>
                         <option value="Hardware" ${formData.category === 'Hardware' ? 'selected' : ''}>Hardware</option>
                         <option value="Software" ${formData.category === 'Software' ? 'selected' : ''}>Software</option>
@@ -124,7 +215,7 @@ function renderTicketForm(formData) {
                 </div>
                 <div class="gui-field">
                     <label>Priority</label>
-                    <select id="gui-priority">
+                    <select id="gui-priority" ${disabledAttr}>
                         <option value="Low" ${formData.priority === 'Low' ? 'selected' : ''}>Low</option>
                         <option value="Medium" ${formData.priority === 'Medium' ? 'selected' : ''}>Medium</option>
                         <option value="High" ${formData.priority === 'High' ? 'selected' : ''}>High</option>
@@ -132,10 +223,7 @@ function renderTicketForm(formData) {
                 </div>
             </div>
             <div class="gui-actions">
-                <button id="gui-submit-btn" class="btn-submit" onclick="submitFinalTicket()">
-                    <i class="ri-send-plane-fill"></i> Submit ticket
-                </button>
-                <button class="btn-discard" onclick="discardForm(this)">Discard</button>
+                ${buttonsHtml}
             </div>
         </div>
     `;
@@ -156,7 +244,9 @@ async function submitFinalTicket() {
         title: document.getElementById('gui-title').value,
         description: document.getElementById('gui-desc').value,
         priority: document.getElementById('gui-priority').value,
-        category: document.getElementById('gui-category').value
+        category: document.getElementById('gui-category').value,
+        // MODIFICATION: Pass the active ID along with the ticket payload
+        session_id: activeSessionId 
     };
 
     try {

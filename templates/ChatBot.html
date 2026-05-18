@@ -10,7 +10,7 @@
     <aside class="history-sidebar">
         <div class="history-header">
             <h3>Chat history</h3>
-            <button class="btn-new-chat"><i class="ri-add-line"></i> New</button>
+            <button class="btn-new-chat" id="new-chat-btn"><i class="ri-add-line"></i> New</button>
         </div>
 
         <div class="history-search">
@@ -24,7 +24,7 @@
             <div class="history-group">
                 <span class="history-label">TODAY</span>
                 {% for ticket in tickets_today %}
-                <div class="history-item hover-shade">
+                <div class="history-item hover-shade" data-session-id="{{ ticket.session_id }}">
                     <p class="history-title">{{ ticket.title }}</p>
                     <div class="history-meta">
                         <span class="status-badge 
@@ -44,7 +44,7 @@
             <div class="history-group">
                 <span class="history-label">YESTERDAY</span>
                 {% for ticket in tickets_yesterday %}
-                <div class="history-item hover-shade">
+                <div class="history-item hover-shade" data-session-id="{{ ticket.session_id }}">
                     <p class="history-title">{{ ticket.title }}</p>
                     <div class="history-meta">
                         <span class="status-badge 
@@ -64,7 +64,7 @@
             <div class="history-group">
                 <span class="history-label">EARLIER</span>
                 {% for ticket in tickets_earlier %}
-                <div class="history-item hover-shade">
+                <div class="history-item hover-shade" data-session-id="{{ ticket.session_id }}">
                     <p class="history-title">{{ ticket.title }}</p>
                     <div class="history-meta">
                         <span class="status-badge 
@@ -104,7 +104,7 @@
                 <button id="send-btn"><i class="ri-send-plane-2-fill"></i></button>
             </div>
             <div class="chat-session-info">
-                <span>Session T-006 · 7 May 2026</span>
+                <span>Session Active · Ready</span>
             </div>
         </div>
     </main>

@@ -1,6 +1,6 @@
 import uuid
 import requests
-from datetime import datetime, date, timedelta  # <-- MINION FIX: All 3 are here now!
+from datetime import datetime, date, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -41,6 +41,7 @@ class Ticket(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now)
     proceeding_started = db.Column(db.DateTime, nullable=True)
     resolved_at = db.Column(db.DateTime, nullable=True)
+    session_id = db.Column(db.String(100), nullable=True) 
 
 class ConversationHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,7 +53,6 @@ class ConversationHistory(db.Model):
 with app.app_context():
     db.create_all()
     
-    # if admin user doesn't exist, create one
     if not Admin_loginDetails.query.filter_by(email='admin@smartdesk.com').first():
         admin_user = Admin_loginDetails(
             email='admin@smartdesk.com',                
@@ -60,7 +60,6 @@ with app.app_context():
         )  
         db.session.add(admin_user)
         
-    # Employee creation
     emp_names = ['harish', 'santhiya', 'sathish', 'priya', 'karthik']
     for emp in emp_names:
         emp_email = f"{emp}@smartdesk.com"
@@ -79,7 +78,6 @@ with app.app_context():
     
 
 def search_knowledge_base(user_query):
-    """ Search the vector database and return result as a String""" 
     try:
         client = chromadb.PersistentClient(path="./chromadb")
         ollama_ef = embedding_functions.OllamaEmbeddingFunction(
@@ -106,7 +104,6 @@ def search_knowledge_base(user_query):
         return "Internal Knowledge Base is currently offline."    
 
 
-
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/employee-login', methods=['GET', 'POST'])
 def employee_login():
@@ -118,8 +115,6 @@ def employee_login():
         
         if user and check_password_hash(user.password, password):
             session.clear()
-            session['chat_session_id'] = str(uuid.uuid4())
-            
             session['user_id'] = user.id
             session['role'] = 'employee'
             session['email'] = user.email 
@@ -130,9 +125,6 @@ def employee_login():
             return render_template('EmployeeLogin.html')
             
     return render_template('EmployeeLogin.html') 
-
-
-   
 
 
 @app.route('/admin-login', methods=['GET', 'POST'])
@@ -153,9 +145,6 @@ def admin_login():
             return render_template('AdminLogin.html')
             
     return render_template('AdminLogin.html') 
-   
-
-
 
 @app.route('/employee-dashboard')
 def employee_dashboard():
@@ -174,9 +163,6 @@ def employee_dashboard():
         in_progress_count=in_progress_count,
         closed_count=closed_count
         )
-
-
-
 
 
 @app.route('/chat-bot')
@@ -204,11 +190,19 @@ def render_chatbot():
     return render_template(
         'ChatBot.html', 
         tickets=my_tickets,
-        
         tickets_today=tickets_today,
         tickets_yesterday=tickets_yesterday,
         tickets_earlier=tickets_earlier
     )
+
+
+
+@app.route('/api/new-chat', methods=['POST'])
+def new_chat():
+    new_session = str(uuid.uuid4())
+  
+    return jsonify({"session_id": new_session})
+
 
 @app.route('/logout')
 def logout():
@@ -345,8 +339,12 @@ def admin_summary():
 def chatbot_api():
     data = request.get_json()
     user_message = data.get('message')
-    if 'chat_session_id' not in session: session['chat_session_id'] = str(uuid.uuid4())
-    current_session_id = session.get('chat_session_id')
+    
+    current_session_id = data.get('session_id')
+    
+    if not current_session_id:
+        current_session_id = str(uuid.uuid4()) # Fallback safeguard
+
     rag_context = search_knowledge_base(user_message)
     
     system_prompt = f"""
@@ -409,17 +407,22 @@ If the user says "Bye," end gracefully.
     history_records = ConversationHistory.query.filter_by(session_id=current_session_id).all()
     messages = [{"role": "system", "content": system_prompt}]
     for record in history_records[-10:]:
-        messages.append({"role": "user", "content": record.user_message})
-        messages.append({"role": "assistant", "content": record.bot_response})
+        # Prevent appending empty user messages (used for backend GUI triggers) to the LLM prompt
+        if record.user_message.strip() != "":
+            messages.append({"role": "user", "content": record.user_message})
+            messages.append({"role": "assistant", "content": record.bot_response})
     messages.append({"role": "user", "content": user_message})
 
     try:
         ollama_response = requests.post(f"{OLLAMA_BASE_URL}/api/chat",
             json={"model": "gpt-oss:120b-cloud", "messages": messages, "stream": False})
-        bot_response_text = ollama_response.json().get('message', {}).get('content', 'Error.')
+        
+        # MODIFICATION: Capture the raw response to save to the DB later
+        raw_bot_response = ollama_response.json().get('message', {}).get('content', 'Error.')
     except:
         return jsonify({'response': 'AI engine unreachable.'})
     
+    bot_response_text = raw_bot_response
     form_data = None
     if "[RAISE_TICKET]" in bot_response_text:
         try:
@@ -432,9 +435,50 @@ If the user says "Bye," end gracefully.
         except Exception as e:
             print(f"Extraction Error: {e}")
 
-    db.session.add(ConversationHistory(session_id=current_session_id, user_message=user_message, bot_response=bot_response_text))
+    # MODIFICATION: Save the RAW response (with the JSON) to the DB so history can rebuild it
+    db.session.add(ConversationHistory(session_id=current_session_id, user_message=user_message, bot_response=raw_bot_response))
     db.session.commit()
     return jsonify({'response': bot_response_text, 'show_form': form_data})
+
+
+@app.route('/api/chat-history/<session_id>', methods=['GET'])
+def get_chat_history(session_id):
+    if 'email' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    history = ConversationHistory.query.filter_by(session_id=session_id).all()
+    
+    
+    ticket_exists = Ticket.query.filter_by(session_id=session_id).first() is not None
+    
+    result = []
+    for h in history:
+       
+        if h.user_message.strip() != "":
+            result.append({"sender": "user", "text": h.user_message})
+        
+       
+        bot_text = h.bot_response
+        form_data = None
+        if "[RAISE_TICKET]" in bot_text:
+            try:
+                parts = bot_text.split("[RAISE_TICKET]")
+                bot_text = parts[0].strip()
+                json_match = re.search(r'\{.*\}', parts[1].strip(), re.DOTALL)
+                if json_match:
+                    form_data = json.loads(json_match.group(0))
+                    bot_text += "\n\nPlease review and edit the ticket details below before submitting."
+            except Exception as e:
+                pass
+                
+        result.append({
+            "sender": "bot", 
+            "text": bot_text, 
+            "show_form": form_data, 
+            "ticket_submitted": ticket_exists
+        })
+    
+    return jsonify({"history": result})
 
 
 @app.route('/submit-ticket-gui', methods=['POST'])
@@ -449,9 +493,23 @@ def submit_ticket_gui():
             description=data.get("description"),
             category=data.get("category"),
             priority=data.get("priority"),
-            status="Open"
+            status="Open",
+           
+            session_id=data.get("session_id")
         )
         db.session.add(new_ticket)
+        
+        
+        success_msg = "Your ticket has been raised successfully. The IT team will get back to you shortly."
+        
+        
+        history_entry = ConversationHistory(
+            session_id=data.get("session_id"), 
+            user_message="", 
+            bot_response=success_msg
+        )
+        db.session.add(history_entry)
+        
         db.session.commit()
         return jsonify({'status': 'success', 'message': 'Ticket raised successfully!'})
     except Exception as e:
@@ -475,5 +533,4 @@ def employeeSideBase():
     
 
 if __name__ == "__main__":
-    app.run(debug=True)    
-
+    app.run(debug=True)

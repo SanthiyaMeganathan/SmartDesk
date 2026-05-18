@@ -74,7 +74,8 @@ body {
     color:#9ca3af;;
     letter-spacing: 0.5px;
     padding-left: 6px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+   
 }
 
 
@@ -255,7 +256,7 @@ so for that div only we style sperlt , defore that we styled with nav-items
 
  .nav-group-report{
     margin-top: 10px;
-    margin-bottom: 1px;
+    margin-bottom: 4px;
  
  }
 
