@@ -18,14 +18,16 @@ body {
     width: 100%;
 }
 
-.dash-header{
+.dash-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: white;
-    padding: 10px 32px;
+    height: 60px; /* Lock height to match sidebar */
+    padding: 0 32px; /* Removed vertical padding, flexbox handles centering */
     border-bottom: 1px solid #e5e7eb;
     margin-bottom: 0px;
+    box-sizing: border-box;
 }
 
 .dash-title{

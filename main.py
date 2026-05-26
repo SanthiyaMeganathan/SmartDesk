@@ -155,7 +155,7 @@ def employee_dashboard():
     my_tickets = Ticket.query.filter_by(email=user_email).all()
     open_count=sum(1 for ticket in my_tickets if ticket.status== 'Open')
     in_progress_count=sum(1 for ticket in my_tickets if ticket.status== 'In Progress')
-    closed_count=sum(1 for ticket in my_tickets if ticket.status== ['Closed','Resolved'])
+    closed_count=sum(1 for ticket in my_tickets if ticket.status == 'Resolved')
     return render_template(
         'EmployeeDashboard.html', 
         tickets=my_tickets,
@@ -313,7 +313,8 @@ def update_ticket_status(ticket_id):
         ticket.status = new_status
         db.session.commit()
         
-    return redirect(url_for('admin_dashboard'))    
+    # Redirect back to the All Tickets page instead of jumping to the dashboard
+    return redirect(request.referrer or url_for('admin_dashboard'))
     
 
 @app.route("/view-tickets")
@@ -349,7 +350,7 @@ def chatbot_api():
     
     system_prompt = f"""
     
-Role: You are the SMARTDESK IT Assistant. Your goal is to resolve issues using {rag_context} or gather data to trigger a ticket GUI.
+    Role: You are the SMARTDESK IT Assistant. Your goal is to resolve issues using {rag_context} or gather data to trigger a ticket GUI.
 
 Strict Formatting Rules:
 
@@ -359,21 +360,24 @@ NO MARKDOWN: Do not use bolding, italics, or lists. Use plain text only.
 
 Never hallucinate: If data is missing (Priority, Category, etc.), you must ask for it.
 
-Always ask the Questiions one at a time. Do not ask for multiple pieces of information in the same message. If you need to ask for multiple pieces of information, ask for them sequentially, one at a time, and wait for the user's response before asking the next question.
+Always ask the Questions one at a time. Do not ask for multiple pieces of information in the same message. If you need to ask for multiple pieces of information, ask for them sequentially, one at a time, and wait for the user's response before asking the next question.
 
-Phase 1: Diagnosis & Fix
+Phase 1: Diagnosis & Fix (STRICT SEQUENCE)
 
-Greeting: If the user is vague, ask for a clear title/summary of the issue.
+Greeting: If the user's first message is vague, ask for a clear title/summary of the issue. Do this only once.
 
-RAG Check: Check {rag_context} first. If a solution exists, provide it and ask: Did that resolve the issue?
+RAG Check: Once you understand the basic issue, check {rag_context} immediately. 
+- If a solution exists: Provide it and ask: "Did that resolve the issue?"
+- If no solution exists: YOU MUST STOP TROUBLESHOOTING. Do not ask for more details, server names, or descriptions. You must explicitly acknowledge the missing data by saying EXACTLY: "I don't have access to the info that you are asking for in my knowledge base. So can we raise a ticket to the admin?" 
+- You must wait for the user to explicitly say "yes" before moving to Phase 2.
 
-Escalation: If the user says no, or no solution exists, ask: Would you like me to raise a ticket to the admin?
+Escalation: If a RAG solution was provided but the user says it did not resolve the issue, ask: "Would you like me to raise a ticket to the admin?"
 
-Phase 2: Ticket Data Gathering (Only if user says Yes)
+Phase 2: Ticket Data Gathering (Only initiate if user says Yes in Phase 1)
 
-Category: Identify if the issue is Network, Hardware, Software, or Access. Ask only if it is unclear. Try to infer from the conversation first before asking.Maximum avoid asking and you try to find out by your own.!
+Category: Identify if the issue is Network, Hardware, Software, or Access. Try to infer from the conversation first before asking. Maximum avoid asking and you try to find out by your own!
 
-Description: Ask the user to describe what they are experiencing.
+Description: Ask the user to describe what they are experiencing in more detail.
 
 Priority: Explicitly ask for Low, Medium, or High.
 
@@ -402,7 +406,11 @@ Closures:
 If the user says "Thank you," respond: "You are welcome! Have a great day!"
 
 If the user says "Bye," end gracefully.
+
+    
     """
+    
+
     
     history_records = ConversationHistory.query.filter_by(session_id=current_session_id).all()
     messages = [{"role": "system", "content": system_prompt}]
@@ -530,6 +538,161 @@ def employeeSideBase():
         'EmployeeSidease.html', 
         tickets=my_tickets,
         )
+    
+@app.route('/mytickeadminside')
+def myticketadminside():
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+
+    # 1. Capture filter parameters from the request (defaults to 'All')
+    status_filter = request.args.get('status', 'All')
+    category_filter = request.args.get('category', 'All')
+    priority_filter = request.args.get('priority', 'All')
+    date_filter = request.args.get('date', 'All')
+
+    # 2. Start with a base query
+    query = Ticket.query
+
+    # 3. Apply filters if a specific option is selected
+    if status_filter != 'All':
+        query = query.filter(Ticket.status == status_filter)
+    if category_filter != 'All':
+        query = query.filter(Ticket.category == category_filter)
+    if priority_filter != 'All':
+        query = query.filter(Ticket.priority == priority_filter)
+
+    # 4. Apply Date filtering
+    if date_filter != 'All':
+        now = datetime.now()
+        if date_filter == 'This week':
+            start_date = now - timedelta(days=7)
+            query = query.filter(Ticket.created_at >= start_date)
+        elif date_filter == 'This Month':
+            start_date = now - timedelta(days=30)
+            query = query.filter(Ticket.created_at >= start_date)
+        elif date_filter == 'Within 3 months':
+            start_date = now - timedelta(days=90)
+            query = query.filter(Ticket.created_at >= start_date)
+
+    # 5. Execute query and order by latest
+    filtered_tickets = query.order_by(Ticket.created_at.desc()).all()
+    total_tickets = Ticket.query.count() # Keeps global count intact if needed elsewhere
+
+    return render_template(
+        'MyTicketAdminSide.html', 
+        tickets=filtered_tickets,
+        total=total_tickets
+    )
+    
+@app.route('/admin-export')
+def admin_export():
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+    
+    # Passing total so the sidebar badge stays populated
+    total_tickets = Ticket.query.count()
+    
+    return render_template('AdminExport.html', total=total_tickets)    
+
+@app.route('/admin-analytics')
+def admin_analytics():
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+
+    all_tickets = Ticket.query.all()
+    total_tickets = len(all_tickets)
+
+    # 1. Top Reporters Calculation
+    reporters = {}
+    for t in all_tickets:
+        if t.email not in reporters:
+            reporters[t.email] = {
+                'email': t.email,
+                'name': t.email.split('@')[0].capitalize() + " " + t.email.split('@')[0][-1].upper(),
+                'initials': t.email[:2].upper(),
+                'total': 0,
+                'resolved': 0
+            }
+        reporters[t.email]['total'] += 1
+        if t.status in ['Resolved', 'Closed']:
+            reporters[t.email]['resolved'] += 1
+
+    top_reporters = sorted(reporters.values(), key=lambda x: x['total'], reverse=True)[:5]
+    max_tickets = top_reporters[0]['total'] if top_reporters else 1
+
+    # 2. Avg Resolution Time Calculation
+    resolved_list = [t for t in all_tickets if t.status == 'Resolved' and t.resolved_at]
+    if resolved_list:
+        total_seconds = sum([(t.resolved_at - t.created_at).total_seconds() for t in resolved_list])
+        avg_days = round((total_seconds / len(resolved_list)) / 86400, 1)
+    else:
+        avg_days = 0.0
+
+    # 3. AI Resolved Sessions Calculation
+    total_chat_sessions = db.session.query(ConversationHistory.session_id).distinct().count()
+    ticket_sessions = db.session.query(Ticket.session_id).filter(Ticket.session_id != None).distinct().count()
+    ai_resolved_count = max(0, total_chat_sessions - ticket_sessions)
+    ai_resolved_pct = round((ai_resolved_count / total_chat_sessions * 100)) if total_chat_sessions > 0 else 0
+
+    # 4. Peak Ticket Day Calculation
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    day_counts = {day: 0 for day in days}
+    for t in all_tickets:
+        day_name = days[t.created_at.weekday()]
+        day_counts[day_name] += 1
+    peak_day = max(day_counts, key=day_counts.get) if all_tickets else "N/A"
+    peak_day_avg = round(day_counts[peak_day] / 4, 1)
+
+    # 5. Category Breakdown Calculation
+    categories = ['Network', 'Access', 'Software', 'Hardware']
+    cat_counts = {c: 0 for c in categories}
+    for t in all_tickets:
+        if t.category in cat_counts:
+            cat_counts[t.category] += 1
+
+    cat_pct = {c: round((count / total_tickets * 100)) if total_tickets > 0 else 0 for c, count in cat_counts.items()}
+    donut_data = [cat_counts['Network'], cat_counts['Access'], cat_counts['Software'], cat_counts['Hardware']]
+
+    # 6. Weekly Trend Data (Last 6 Weeks)
+    now = datetime.now()
+    weeks_labels = []
+    bar_data = []
+    line_open_data = []
+    line_resolved_data = []
+
+    for i in range(5, -1, -1):
+        start_date = now - timedelta(days=(i * 7) + 7)
+        end_date = now - timedelta(days=i * 7)
+        weeks_labels.append(end_date.strftime('%d %b'))
+
+        week_tickets = [t for t in all_tickets if start_date <= t.created_at < end_date]
+        bar_data.append(len(week_tickets))
+        line_open_data.append(sum(1 for t in week_tickets if t.status == 'Open'))
+        line_resolved_data.append(sum(1 for t in week_tickets if t.status == 'Resolved'))
+
+    # Package all chart data to send to Javascript
+    chart_data = {
+        'labels': weeks_labels,
+        'barData': bar_data,
+        'donutData': donut_data,
+        'lineOpen': line_open_data,
+        'lineResolved': line_resolved_data,
+        'catCounts': cat_counts,
+        'catPct': cat_pct
+    }
+
+    return render_template(
+        'AdminAnalytical.html',
+        total=total_tickets,
+        top_reporters=top_reporters,
+        max_tickets=max_tickets,
+        avg_days=avg_days,
+        ai_resolved_count=ai_resolved_count,
+        ai_resolved_pct=ai_resolved_pct,
+        peak_day=peak_day,
+        peak_day_avg=peak_day_avg,
+        chart_data=chart_data
+    )      
     
 
 if __name__ == "__main__":

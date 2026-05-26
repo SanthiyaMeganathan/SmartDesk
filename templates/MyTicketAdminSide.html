@@ -1,0 +1,137 @@
+{% extends "AdminSideMacron.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/MyTicketAdminSide.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    
+    <div class="dash-header">
+        <div class="dash-title">
+            <h2>All Tickets</h2>
+            <span class="subtitle">{{ tickets | length }} total</span>
+        </div>
+
+        <div class="dash-actions">
+            <div class="search-bar">
+                <i class="ri-search-line"></i>
+                <input type="text" placeholder="Search by title, user, ID...">
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content-container">
+        
+        <form method="GET" action="{{ url_for('myticketadminside') }}" class="table-actions-row">
+            <div class="filter-section">
+                <div class="filter-group">
+                    <select name="status">
+                        <option value="All" {% if request.args.get('status') == 'All' or not request.args.get('status') %}selected{% endif %}>Status: All</option>
+                        <option value="Open" {% if request.args.get('status') == 'Open' %}selected{% endif %}>Open</option>
+                        <option value="In Progress" {% if request.args.get('status') == 'In Progress' %}selected{% endif %}>In Progress</option>
+                        <option value="Resolved" {% if request.args.get('status') == 'Resolved' %}selected{% endif %}>Resolved</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select name="category">
+                        <option value="All" {% if request.args.get('category') == 'All' or not request.args.get('category') %}selected{% endif %}>Category: All</option>
+                        <option value="Access" {% if request.args.get('category') == 'Access' %}selected{% endif %}>Access</option>
+                        <option value="Software" {% if request.args.get('category') == 'Software' %}selected{% endif %}>Software</option>
+                        <option value="Hardware" {% if request.args.get('category') == 'Hardware' %}selected{% endif %}>Hardware</option>
+                        <option value="Network" {% if request.args.get('category') == 'Network' %}selected{% endif %}>Network</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select name="priority">
+                        <option value="All" {% if request.args.get('priority') == 'All' or not request.args.get('priority') %}selected{% endif %}>Priority: All</option>
+                        <option value="Low" {% if request.args.get('priority') == 'Low' %}selected{% endif %}>Low</option>
+                        <option value="Medium" {% if request.args.get('priority') == 'Medium' %}selected{% endif %}>Medium</option>
+                        <option value="High" {% if request.args.get('priority') == 'High' %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <select name="date">
+                        <option value="All" {% if request.args.get('date') == 'All' or not request.args.get('date') %}selected{% endif %}>Date: All Time</option>
+                        <option value="This week" {% if request.args.get('date') == 'This week' %}selected{% endif %}>This week</option>
+                        <option value="This Month" {% if request.args.get('date') == 'This Month' %}selected{% endif %}>This Month</option>
+                        <option value="Within 3 months" {% if request.args.get('date') == 'Within 3 months' %}selected{% endif %}>Within 3 months</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button type="submit" class="btn-secondary"><i class="ri-equalizer-line"></i> Filter</button>
+                <button type="button" class="btn-secondary"><i class="ri-download-2-line"></i> Export</button>
+            </div>
+        </form>
+
+        <div class="table-container">
+            <table class="emp-ticket-table">
+                <thead>
+                    <tr>
+                        <th width="3%"><input type="checkbox" id="selectAll"></th>
+                        <th width="8%">#</th>
+                        <th width="32%">Title</th>
+                        <th width="17%">Raised by</th>
+                        <th width="10%">Category</th>
+                        <th width="10%">Priority</th>
+                        <th width="10%">Status</th>
+                        <th width="10%">Created</th>
+                    </tr>
+                </thead>
+                <tbody class="table-body">
+                    {% for ticket in tickets %}
+                    <tr class="ticket-row">
+                        <td><input type="checkbox" class="ticket-checkbox"></td>
+                        <td class="t-id">T-{{ "%03d" | format(ticket.id) }}</td>
+                        <td class="t-title-col">
+                            <div class="t-title">{{ ticket.title }}</div>
+                            <div class="t-desc">{{ ticket.description }}</div>
+                        </td>
+                        <td class="t-email">{{ ticket.email }}</td>
+                        <td>
+                            <span class="cat-badge cat-{{ ticket.category|lower|replace(' ', '-') }}">
+                                {{ ticket.category }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if ticket.priority|lower == 'high' %}
+                                <span class="priority p-high"><i class="ri-arrow-up-line"></i> High</span>
+                            {% elif ticket.priority|lower == 'medium' %}
+                                <span class="priority p-med"><i class="ri-subtract-line"></i> Medium</span>
+                            {% else %}
+                                <span class="priority p-low"><i class="ri-arrow-down-line"></i> Low</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('update_ticket_status', ticket_id=ticket.id) }}" method="POST" style="margin: 0;">
+                                <select name="new_status" class="status-badge-select s-{{ ticket.status|lower|replace(' ', '-') }}" onchange="this.form.submit()">
+                                    <option value="Open" {% if ticket.status == 'Open' %}selected{% endif %}>Open</option>
+                                    <option value="In Progress" {% if ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="Resolved" {% if ticket.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                                </select>
+                            </form>
+                        </td>
+                        <td class="t-date">
+                            {{ ticket.created_at.strftime('%d %b') if ticket.created_at else 'N/A' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="pagination-footer">
+                <span class="page-info" id="pagination-info">Showing tickets</span>
+                <div class="page-controls">
+                    <button class="page-btn" id="prev-btn" onclick="changePage(-1)"><i class="ri-arrow-left-s-line"></i></button>
+                    <button class="page-btn active" id="current-page-btn">1</button>
+                    <button class="page-btn" id="next-btn" onclick="changePage(1)"><i class="ri-arrow-right-s-line"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/MyTicketAdminSide.js') }}"></script>
+{% endblock %}

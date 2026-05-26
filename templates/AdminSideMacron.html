@@ -26,25 +26,25 @@
         <div class="nav-container">
             <div class="nav-group">
                 <span class="label">MAIN</span>
-                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
                     <i class="ri-dashboard-line"></i>
                     DashBoard
                 </a>
-                <a href="#" class="nav-item">
+                
+                <a href="{{ url_for('myticketadminside') }}" class="nav-item {% if request.endpoint == 'myticketadminside' %}active{% endif %}">
                     <i class="ri-coupon-2-line"></i>
                     All Tickets
+                    <span class="badge-ticket">{{ total }}</span>
                 </a>
             </div>
 
-            <div class="badge-ticket">{{ total }}</div>
-
             <div class="nav-group-report">
                 <span class="label">REPORTS</span>
-                <a href="#" class="nav-item">
+                <a href="{{ url_for('admin_analytics') }}" class="nav-item {% if request.endpoint == 'admin_analytics' %}active{% endif %}">
                     <i class="ri-bar-chart-2-line"></i>
                     Analytics
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{{ url_for('admin_export') }}" class="nav-item {% if request.endpoint == 'admin_export' %}active{% endif %}">
                     <i class="ri-export-line"></i>
                     Export
                 </a>

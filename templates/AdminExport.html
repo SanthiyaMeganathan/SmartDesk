@@ -1,0 +1,114 @@
+{% extends "AdminSideMacron.html" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminExport.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    
+    <div class="dash-header">
+        <div class="dash-title">
+            <h2>Export</h2>
+            <span class="subtitle">Download ticket reports</span>
+        </div>
+    </div>
+
+    <div class="main-content-container">
+        
+        <div class="export-sidebar">
+            
+            <div class="filter-section">
+                <div class="filter-heading">Date range</div>
+                <div class="date-range-inputs">
+                    <input type="date" id="start-date" class="date-input" value="2026-05-01">
+                    <input type="date" id="end-date" class="date-input" value="2026-05-07">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-heading">Filter by status</div>
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="status-all" class="status-cb" checked>
+                        <span class="checkmark"></span>
+                        <span class="cb-label">All tickets</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" value="Open" class="status-cb">
+                        <span class="checkmark"></span>
+                        <span class="cb-label">Open only</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" value="In Progress" class="status-cb">
+                        <span class="checkmark"></span>
+                        <span class="cb-label">In Progress only</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" value="Resolved" class="status-cb">
+                        <span class="checkmark"></span>
+                        <span class="cb-label">Resolved only</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-heading">Filter by category</div>
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" id="cat-all" class="cat-cb" checked>
+                        <span class="checkmark"></span>
+                        <span class="cb-label">All categories</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" value="Network" class="cat-cb">
+                        <span class="checkmark"></span>
+                        <span class="cb-label">Network</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" value="Hardware" class="cat-cb">
+                        <span class="checkmark"></span>
+                        <span class="cb-label">Hardware</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" value="Software" class="cat-cb">
+                        <span class="checkmark"></span>
+                        <span class="cb-label">Software</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" value="Access" class="cat-cb">
+                        <span class="checkmark"></span>
+                        <span class="cb-label">Access</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-heading">Export format</div>
+                <div class="format-toggle-group">
+                    <button class="format-btn active" id="btn-excel">
+                        <i class="ri-file-excel-2-fill"></i> Excel (.xlsx)
+                    </button>
+                    <button class="format-btn" id="btn-csv">
+                        <i class="ri-file-text-line"></i> CSV (.csv)
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-section no-border-bottom">
+                <button class="download-btn" id="download-report-btn">
+                    <i class="ri-download-2-line"></i> Download report
+                </button>
+            </div>
+
+        </div>
+
+        <div class="export-preview-placeholder">
+            </div>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/AdminExport.js') }}"></script>
+{% endblock %}

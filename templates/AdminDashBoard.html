@@ -66,12 +66,12 @@
 
         <div class="recent-tickets-card">
             <div class="section-header">
-                <div class="header-title">
-                    <i class="ri-time-line"></i>
-                    <h3>Recent tickets</h3>
-                </div>
-                <a href="#" class="view-all">View all <i class="ri-arrow-right-line"></i></a>
-            </div>
+      <div class="header-title">
+        <i class="ri-time-line"></i>
+        <h3>Recent tickets</h3>
+     </div>
+     <a href="{{ url_for('myticketadminside') }}" class="view-all">View all <i class="ri-arrow-right-line"></i></a>
+     </div>
 
             <div class="ticket-list">
                 {% for ticket in recent_tickets %}
@@ -96,12 +96,12 @@
         <div class="analytics-card">
 
             <div class="section-header">
-                <div class="header-title">
-                    <i class="ri-bar-chart-box-line"></i>
-                    <h3>Tickets by category</h3>
-                </div>
-                <a href="#" class="view-all">Analytics <i class="ri-arrow-right-line"></i></a>
-            </div>
+    <div class="header-title">
+        <i class="ri-bar-chart-box-line"></i>
+        <h3>Tickets by category</h3>
+    </div>
+    <a href="{{ url_for('admin_analytics') }}" class="view-all">Analytics <i class="ri-arrow-right-line"></i></a>
+</div>
 
             <div class="category-list">
                 <div class="cat-row">

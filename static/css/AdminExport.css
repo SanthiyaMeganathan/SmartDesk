@@ -1,0 +1,235 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-wrapper {
+    background-color: #f9fafb;
+    height: 100vh; 
+    overflow: hidden; 
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #111827;
+}
+
+/* Header Styles (Your existing code) */
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 10px 32px;
+    border-bottom: 1px solid #e5e7eb;
+    height: 60px; 
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.dash-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.dash-title h2 {
+    font-size: 1.2rem;
+    font-weight: 650;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+/* Layout for Sidebar and Table */
+.main-content-container {
+    padding: 24px 32px;
+    display: flex;
+    gap: 20px; 
+    height: calc(100vh - 60px); 
+    overflow-y: auto; 
+    align-items: flex-start; /* Prevents stretching */
+}
+
+/* --- NEW SIDEBAR STYLES --- */
+.export-sidebar {
+    width: 320px;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.filter-section {
+    padding: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.no-border-bottom {
+    border-bottom: none;
+}
+
+.filter-heading {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+}
+
+/* Date Range Inputs */
+.date-range-inputs {
+    display: flex;
+    gap: 10px;
+}
+
+.date-input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #4b5563;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+
+.date-input:focus {
+    border-color: #111827;
+}
+
+/* Custom Checkboxes */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    height: 16px;
+    width: 16px;
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.custom-checkbox:hover input ~ .checkmark {
+    border-color: #9ca3af;
+}
+
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: #111827;
+    border-color: #111827;
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+    content: "";
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+.cb-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    transition: color 0.2s ease;
+}
+
+.custom-checkbox input:checked ~ .cb-label {
+    color: #111827;
+    font-weight: 500;
+}
+
+/* Export Format Toggle Buttons */
+.format-toggle-group {
+    display: flex;
+    gap: 8px;
+}
+
+.format-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px;
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #6b7280;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.format-btn i {
+    font-size: 1rem;
+}
+
+.format-btn:hover {
+    background-color: #f9fafb;
+}
+
+.format-btn.active {
+    background-color: #111827;
+    border-color: #111827;
+    color: white;
+}
+
+/* Download Button */
+.download-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background-color: #111827;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-family: inherit;
+}
+
+.download-btn:hover {
+    background-color: #1f2937;
+}
+
+/* Placeholder for the table area */
+.export-preview-placeholder {
+    flex-grow: 1;
+}

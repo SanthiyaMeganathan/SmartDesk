@@ -1,0 +1,313 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.dashboard-wrapper {
+    background-color: #f9fafb; 
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #000000;
+    width: 100%;
+}
+
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 7px 32px;
+    border-bottom: 1px solid #e5e7eb;
+    height: 60px; 
+    flex-shrink: 0;
+}
+
+.dash-title {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.dash-title h2 {
+    margin: 0px;
+    font-size: 1.2rem;
+    font-weight: 650;
+    color: #111827;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #9ca3af; 
+    font-weight: 500;
+}
+
+.dash-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.search-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #f3f4f6; 
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 15px;
+    width: 280px;
+}
+
+.search-bar i {
+    color: #9ca3af;
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+.search-bar input {
+    background: transparent; 
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.95rem;
+    color: #4b5563;
+}
+
+.main-content-container {
+    padding: 24px 32px;
+}
+
+.table-actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-section {
+    display: flex;
+    gap: 12px;
+}
+
+.filter-group select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    background-color: white;
+    color: #4b5563;
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    min-width: 130px;
+}
+
+.filter-group select:focus {
+    border-color: #3b82f6;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background-color: #f9fafb;
+    color: #111827;
+}
+
+.table-container {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid #e5e7eb; 
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.emp-ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.emp-ticket-table th {
+    padding: 14px 20px;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-weight: 500;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+}
+
+.emp-ticket-table td {
+    padding: 12px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.emp-ticket-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.emp-ticket-table input[type="checkbox"] {
+    cursor: pointer;
+    width: 14px;
+    height: 14px;
+}
+
+.t-id {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.t-title-col {
+    max-width: 350px; 
+}
+
+.t-title {
+    color: #111827;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+}
+
+.t-desc {
+    color: #9ca3af;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.t-email {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.t-date {
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.priority {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.p-high { color: #ef4444; }
+.p-med { color: #d97706; }
+.p-low { color: #10b981; }
+
+/* Interactive Dropdown CSS */
+.status-badge-select {
+    padding: 4px 22px 4px 10px; /* Extra padding on the right for the dropdown arrow */
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    border: none;
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    outline: none;
+    /* Custom subtle dropdown arrow */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 12px;
+}
+
+/* Ensure dropdown options have standard colors so they are easy to read when opened */
+.status-badge-select option {
+    background-color: white;
+    color: #111827;
+    font-weight: 500;
+}
+
+.s-open { background-color: #fee2e2; color: #ef4444; }
+.s-in-progress { background-color: #fef3c7; color: #d97706; }
+.s-resolved { background-color: #f0fdf4; color: #16a34a; }
+
+.cat-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.cat-software, .cat-access { background-color: #f3f4f6; color: #4b5563; }
+.cat-network { background-color: #eff6ff; color: #3b82f6; }
+.cat-hardware { background-color: #fef3c7; color: #d97706; }
+
+.pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    border-top: 1px solid #e5e7eb;
+    background-color: white;
+}
+
+.page-info {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+.page-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.page-btn {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #f9fafb;
+}
+
+.page-btn.active {
+    background-color: #111827;
+    color: white;
+    border-color: #111827;
+}
+
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: #f9fafb;
+}
