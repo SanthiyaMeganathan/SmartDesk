@@ -584,15 +584,6 @@ def myticketadminside():
         total=total_tickets
     )
     
-@app.route('/admin-export')
-def admin_export():
-    if session.get('role') != 'admin':
-        return redirect(url_for('admin_login'))
-    
-    # Passing total so the sidebar badge stays populated
-    total_tickets = Ticket.query.count()
-    
-    return render_template('AdminExport.html', total=total_tickets)    
 
 @app.route('/admin-analytics')
 def admin_analytics():
@@ -692,8 +683,49 @@ def admin_analytics():
         peak_day=peak_day,
         peak_day_avg=peak_day_avg,
         chart_data=chart_data
-    )      
+    )   
+
+@app.route('/admin-export')
+def admin_export():
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
     
+    # FIX: Remove .all() here. Keep it as a query object.
+    query = Ticket.query
+    
+    # filter parameters:
+    statuses = request.args.getlist('status')
+    categories = request.args.getlist('category')
+    priorities = request.args.getlist('priority')
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    # date filter:
+    if start_date_str and end_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1, seconds=-1)
+            query = query.filter(Ticket.created_at >= start_date, Ticket.created_at <= end_date)
+        except ValueError:
+            pass # Ignore invalid date formats
+
+    # status filter:
+    if statuses and 'All' not in statuses:
+        query = query.filter(Ticket.status.in_(statuses))
+
+    # category filter:
+    if categories and 'All' not in categories:
+        query = query.filter(Ticket.category.in_(categories))
+
+    # priority filter:
+    if priorities and 'All' not in priorities:
+        query = query.filter(Ticket.priority.in_(priorities))
+        
+    # Now we can safely call count() and order_by() on the query object
+    total_tickets = query.count()
+    preview_tickets = query.order_by(Ticket.created_at.desc()).limit(3).all()   
+    
+    return render_template('AdminExport.html', total=total_tickets, preview_tickets=preview_tickets)
 
 if __name__ == "__main__":
     app.run(debug=True)

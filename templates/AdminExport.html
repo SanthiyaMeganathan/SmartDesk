@@ -21,8 +21,8 @@
             <div class="filter-section">
                 <div class="filter-heading">Date range</div>
                 <div class="date-range-inputs">
-                    <input type="date" id="start-date" class="date-input" value="2026-05-01">
-                    <input type="date" id="end-date" class="date-input" value="2026-05-07">
+                    <input type="date" id="start-date" class="date-input" value="{{ request.args.get('start_date', '2026-05-01') }}">
+                    <input type="date" id="end-date" class="date-input" value="{{ request.args.get('end_date', '2026-05-07') }}">
                 </div>
             </div>
 
@@ -30,24 +30,24 @@
                 <div class="filter-heading">Filter by status</div>
                 <div class="checkbox-group">
                     <label class="custom-checkbox">
-                        <input type="checkbox" id="status-all" class="status-cb" checked>
+                        <input type="checkbox" id="status-all" class="status-cb" {% if not request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">All tickets</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Open" class="status-cb">
+                        <input type="checkbox" value="Open" class="status-cb" {% if 'Open' in request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
-                        <span class="cb-label">Open only</span>
+                        <span class="cb-label">Open</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="In Progress" class="status-cb">
+                        <input type="checkbox" value="In Progress" class="status-cb" {% if 'In Progress' in request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
-                        <span class="cb-label">In Progress only</span>
+                        <span class="cb-label">In Progress</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Resolved" class="status-cb">
+                        <input type="checkbox" value="Resolved" class="status-cb" {% if 'Resolved' in request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
-                        <span class="cb-label">Resolved only</span>
+                        <span class="cb-label">Resolved</span>
                     </label>
                 </div>
             </div>
@@ -56,27 +56,27 @@
                 <div class="filter-heading">Filter by category</div>
                 <div class="checkbox-group">
                     <label class="custom-checkbox">
-                        <input type="checkbox" id="cat-all" class="cat-cb" checked>
+                        <input type="checkbox" id="cat-all" class="cat-cb" {% if not request.args.getlist('category') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">All categories</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Network" class="cat-cb">
+                        <input type="checkbox" value="Network" class="cat-cb" {% if 'Network' in request.args.getlist('category') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">Network</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Hardware" class="cat-cb">
+                        <input type="checkbox" value="Hardware" class="cat-cb" {% if 'Hardware' in request.args.getlist('category') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">Hardware</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Software" class="cat-cb">
+                        <input type="checkbox" value="Software" class="cat-cb" {% if 'Software' in request.args.getlist('category') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">Software</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Access" class="cat-cb">
+                        <input type="checkbox" value="Access" class="cat-cb" {% if 'Access' in request.args.getlist('category') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">Access</span>
                     </label>
@@ -86,12 +86,8 @@
             <div class="filter-section">
                 <div class="filter-heading">Export format</div>
                 <div class="format-toggle-group">
-                    <button class="format-btn active" id="btn-excel">
-                        <i class="ri-file-excel-2-fill"></i> Excel (.xlsx)
-                    </button>
-                    <button class="format-btn" id="btn-csv">
-                        <i class="ri-file-text-line"></i> CSV (.csv)
-                    </button>
+                    <button class="format-btn active" id="btn-excel"><i class="ri-file-excel-2-fill"></i> Excel (.xlsx)</button>
+                    <button class="format-btn" id="btn-csv"><i class="ri-file-text-line"></i> CSV (.csv)</button>
                 </div>
             </div>
 
@@ -100,14 +96,65 @@
                     <i class="ri-download-2-line"></i> Download report
                 </button>
             </div>
-
         </div>
 
-        <div class="export-preview-placeholder">
+        <div class="export-preview-box">
+            <div class="ep-header">
+                <div class="ep-header-left"><i class="ri-eye-line"></i> Export preview</div>
+                <div class="ep-header-right">{{ total }} rows will be exported</div>
             </div>
 
+            <div class="ep-table-container">
+                <table class="ep-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Title</th>
+                            <th>Raised by</th>
+                            <th>Category</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in preview_tickets %}
+                        <tr>
+                            <td>T-{{ "%03d"|format(ticket.id) }}</td>
+                            <td class="ep-title">{{ ticket.title }}</td>
+                            <td class="ep-email">{{ ticket.email.split('@')[0] }}@...</td>
+                            <td><span class="badge badge-cat">{{ ticket.category}}</span></td>
+                            <td>
+                                {% if ticket.priority == 'High' %}
+                                    <span class="badge badge-prio-high"><i class="ri-arrow-up-line"></i> High</span>
+                                {% elif ticket.priority == 'Medium' %}
+                                    <span class="badge badge-prio-med"><i class="ri-subtract-line"></i> Medium</span>
+                                {% else %}
+                                    <span class="badge badge-prio-low"><i class="ri-arrow-down-line"></i> Low</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ticket.status == 'Resolved' %}
+                                    <span class="badge badge-stat-resolved">Resolved</span>
+                                {% elif ticket.status == 'In Progress' %}
+                                    <span class="badge badge-stat-progress">In Progress</span>
+                                {% else %}
+                                    <span class="badge badge-stat-open">Open</span>
+                                {% endif %}
+                            </td>
+                            <td class="ep-date">{{ ticket.created_at.day }} {{ ticket.created_at.strftime('%b') }}</td>
+                        </tr>
+                        {% endfor %}
+                        
+                        {% if not preview_tickets %}
+                        <tr><td colspan="7" style="text-align: center; padding: 30px; color: #9ca3af;">No tickets found.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="ep-footer">Preview shows first {{ preview_tickets|length }} rows. Full export will include all {{ total }} matching tickets.</div>
+        </div>
     </div>
-
 </div>
 
 <script src="{{ url_for('static', filename='js/AdminExport.js') }}"></script>
