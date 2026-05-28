@@ -12,9 +12,7 @@
     color: #111827;
 }
 
-/* =========================
-   HEADER
-========================= */
+
 
 .dash-header {
     display: flex;
@@ -43,20 +41,15 @@
     font-weight: 500;
 }
 
-/* =========================
-   MAIN LAYOUT
-========================= */
 
 .main-content-container {
     padding: 24px 32px;
     display: flex;
     gap: 20px;
-    align-items: flex-start;
+    align-items: stretch;
 }
 
-/* =========================
-   SIDEBAR
-========================= */
+
 
 .export-sidebar {
     width: 380px;
@@ -82,9 +75,7 @@
     margin-bottom: 10px;
 }
 
-/* =========================
-   DATE INPUTS
-========================= */
+
 
 .date-range-inputs {
     display: flex;
@@ -214,6 +205,7 @@
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
+    
 }
 
 .ep-header {

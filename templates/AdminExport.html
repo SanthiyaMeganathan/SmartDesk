@@ -22,9 +22,8 @@
                 <div class="filter-heading">Date range</div>
                 <div class="date-range-inputs">
                     <input type="date" id="start-date" class="date-input"
-                        value="{{ request.args.get('start_date', '2026-05-01') }}">
-                    <input type="date" id="end-date" class="date-input"
-                        value="{{ request.args.get('end_date', '2026-05-07') }}">
+                        value="{{ request.args.get('start_date', '') }}">
+                    <input type="date" id="end-date" class="date-input" value="{{ request.args.get('end_date') }}">
                 </div>
             </div>
 
@@ -113,7 +112,9 @@
         <div class="export-preview-box">
             <div class="ep-header">
                 <div class="ep-header-left"><i class="ri-eye-line"></i> Export preview</div>
-                <div class="ep-header-right">{{ total }} rows will be exported</div>
+                <div class="ep-header-right">
+                    {{ filtered_total }} rows will be exported
+                </div>
             </div>
 
 
@@ -200,8 +201,15 @@
             </div>
 
 
-            <div class="ep-footer">Preview shows first {{ preview_tickets|length }} rows. Full export will include all
-                {{ total }} matching tickets.</div>
+       
+            <div class="ep-footer">
+
+                Preview shows latest {{ [preview_tickets|length, 3] | min }} rows.
+
+                Full export will include all {{ filtered_total }} matching tickets.
+
+            </div>
+          
         </div>
     </div>
 </div>

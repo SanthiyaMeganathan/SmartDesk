@@ -8,6 +8,10 @@ import chromadb
 from chromadb.utils import embedding_functions
 import json
 import re
+import csv
+from io import StringIO, BytesIO
+from flask import make_response
+from openpyxl import Workbook
 
 
 app = Flask(__name__)
@@ -286,7 +290,8 @@ def admin_dashboard():
         avg_res_time=avg_res_time,
         cat_stats=cat_analytics,
         tickets=filtered_tickets,  
-        recent_tickets=top_five   )
+        recent_tickets=top_five   
+    )
     
     
 @app.route("/update-ticket-status/<int:ticket_id>", methods=['POST'])
@@ -312,8 +317,7 @@ def update_ticket_status(ticket_id):
             
         ticket.status = new_status
         db.session.commit()
-        
-    # Redirect back to the All Tickets page instead of jumping to the dashboard
+
     return redirect(request.referrer or url_for('admin_dashboard'))
     
 
@@ -415,7 +419,6 @@ If the user says "Bye," end gracefully.
     history_records = ConversationHistory.query.filter_by(session_id=current_session_id).all()
     messages = [{"role": "system", "content": system_prompt}]
     for record in history_records[-10:]:
-        # Prevent appending empty user messages (used for backend GUI triggers) to the LLM prompt
         if record.user_message.strip() != "":
             messages.append({"role": "user", "content": record.user_message})
             messages.append({"role": "assistant", "content": record.bot_response})
@@ -424,8 +427,6 @@ If the user says "Bye," end gracefully.
     try:
         ollama_response = requests.post(f"{OLLAMA_BASE_URL}/api/chat",
             json={"model": "gpt-oss:120b-cloud", "messages": messages, "stream": False})
-        
-        # MODIFICATION: Capture the raw response to save to the DB later
         raw_bot_response = ollama_response.json().get('message', {}).get('content', 'Error.')
     except:
         return jsonify({'response': 'AI engine unreachable.'})
@@ -443,7 +444,6 @@ If the user says "Bye," end gracefully.
         except Exception as e:
             print(f"Extraction Error: {e}")
 
-    # MODIFICATION: Save the RAW response (with the JSON) to the DB so history can rebuild it
     db.session.add(ConversationHistory(session_id=current_session_id, user_message=user_message, bot_response=raw_bot_response))
     db.session.commit()
     return jsonify({'response': bot_response_text, 'show_form': form_data})
@@ -454,9 +454,7 @@ def get_chat_history(session_id):
     if 'email' not in session:
         return jsonify({"error": "Unauthorized"}), 401
     
-    history = ConversationHistory.query.filter_by(session_id=session_id).all()
-    
-    
+    history = ConversationHistory.query.filter_by(session_id=session_id).all() 
     ticket_exists = Ticket.query.filter_by(session_id=session_id).first() is not None
     
     result = []
@@ -506,11 +504,7 @@ def submit_ticket_gui():
             session_id=data.get("session_id")
         )
         db.session.add(new_ticket)
-        
-        
         success_msg = "Your ticket has been raised successfully. The IT team will get back to you shortly."
-        
-        
         history_entry = ConversationHistory(
             session_id=data.get("session_id"), 
             user_message="", 
@@ -544,16 +538,16 @@ def myticketadminside():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
 
-    # 1. Capture filter parameters from the request (defaults to 'All')
+   
     status_filter = request.args.get('status', 'All')
     category_filter = request.args.get('category', 'All')
     priority_filter = request.args.get('priority', 'All')
     date_filter = request.args.get('date', 'All')
 
-    # 2. Start with a base query
+    
     query = Ticket.query
 
-    # 3. Apply filters if a specific option is selected
+   
     if status_filter != 'All':
         query = query.filter(Ticket.status == status_filter)
     if category_filter != 'All':
@@ -561,7 +555,6 @@ def myticketadminside():
     if priority_filter != 'All':
         query = query.filter(Ticket.priority == priority_filter)
 
-    # 4. Apply Date filtering
     if date_filter != 'All':
         now = datetime.now()
         if date_filter == 'This week':
@@ -574,10 +567,9 @@ def myticketadminside():
             start_date = now - timedelta(days=90)
             query = query.filter(Ticket.created_at >= start_date)
 
-    # 5. Execute query and order by latest
+   
     filtered_tickets = query.order_by(Ticket.created_at.desc()).all()
-    total_tickets = Ticket.query.count() # Keeps global count intact if needed elsewhere
-
+    total_tickets = Ticket.query.count()
     return render_template(
         'MyTicketAdminSide.html', 
         tickets=filtered_tickets,
@@ -593,7 +585,7 @@ def admin_analytics():
     all_tickets = Ticket.query.all()
     total_tickets = len(all_tickets)
 
-    # 1. Top Reporters Calculation
+   
     reporters = {}
     for t in all_tickets:
         if t.email not in reporters:
@@ -611,7 +603,7 @@ def admin_analytics():
     top_reporters = sorted(reporters.values(), key=lambda x: x['total'], reverse=True)[:5]
     max_tickets = top_reporters[0]['total'] if top_reporters else 1
 
-    # 2. Avg Resolution Time Calculation
+   
     resolved_list = [t for t in all_tickets if t.status == 'Resolved' and t.resolved_at]
     if resolved_list:
         total_seconds = sum([(t.resolved_at - t.created_at).total_seconds() for t in resolved_list])
@@ -619,22 +611,45 @@ def admin_analytics():
     else:
         avg_days = 0.0
 
-    # 3. AI Resolved Sessions Calculation
+    
     total_chat_sessions = db.session.query(ConversationHistory.session_id).distinct().count()
     ticket_sessions = db.session.query(Ticket.session_id).filter(Ticket.session_id != None).distinct().count()
     ai_resolved_count = max(0, total_chat_sessions - ticket_sessions)
     ai_resolved_pct = round((ai_resolved_count / total_chat_sessions * 100)) if total_chat_sessions > 0 else 0
-
-    # 4. Peak Ticket Day Calculation
+    
+  
     days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
     day_counts = {day: 0 for day in days}
+    latest_peak_ticket = None
+
     for t in all_tickets:
         day_name = days[t.created_at.weekday()]
         day_counts[day_name] += 1
-    peak_day = max(day_counts, key=day_counts.get) if all_tickets else "N/A"
-    peak_day_avg = round(day_counts[peak_day] / 4, 1)
 
-    # 5. Category Breakdown Calculation
+    peak_day = max(day_counts, key=day_counts.get) if all_tickets else "N/A"
+
+    if peak_day != "N/A":
+        peak_day_avg = round(day_counts[peak_day] / 4, 1)
+    else:
+        peak_day_avg = 0.0
+
+  
+    peak_day_tickets = [
+        t for t in all_tickets
+        if days[t.created_at.weekday()] == peak_day
+    ]
+
+    if peak_day_tickets:
+        latest_peak_ticket = max(
+            peak_day_tickets,
+            key=lambda t: t.created_at
+        )
+        peak_day_date = latest_peak_ticket.created_at.strftime('%d %b %Y')
+    else:
+        peak_day_date = "N/A"
+
+  
     categories = ['Network', 'Access', 'Software', 'Hardware']
     cat_counts = {c: 0 for c in categories}
     for t in all_tickets:
@@ -644,24 +659,49 @@ def admin_analytics():
     cat_pct = {c: round((count / total_tickets * 100)) if total_tickets > 0 else 0 for c, count in cat_counts.items()}
     donut_data = [cat_counts['Network'], cat_counts['Access'], cat_counts['Software'], cat_counts['Hardware']]
 
-    # 6. Weekly Trend Data (Last 6 Weeks)
     now = datetime.now()
+
     weeks_labels = []
     bar_data = []
     line_open_data = []
     line_resolved_data = []
 
     for i in range(5, -1, -1):
-        start_date = now - timedelta(days=(i * 7) + 7)
+        start_date = now - timedelta(days=(i + 1) * 7)
         end_date = now - timedelta(days=i * 7)
-        weeks_labels.append(end_date.strftime('%d %b'))
+        
+        weeks_labels.append(
+            f"{start_date.strftime('%d %b')}"
+        )
 
-        week_tickets = [t for t in all_tickets if start_date <= t.created_at < end_date]
-        bar_data.append(len(week_tickets))
-        line_open_data.append(sum(1 for t in week_tickets if t.status == 'Open'))
-        line_resolved_data.append(sum(1 for t in week_tickets if t.status == 'Resolved'))
+        raised_this_week = [
+            t for t in all_tickets
+            if start_date <= t.created_at < end_date
+        ]
 
-    # Package all chart data to send to Javascript
+
+        open_tickets = [
+            t for t in all_tickets
+            if t.created_at <= end_date
+            and (
+                t.resolved_at is None
+                or t.resolved_at > end_date
+            )
+        ]
+
+        resolved_tickets = [
+            t for t in all_tickets
+            if t.resolved_at is not None
+            and t.resolved_at <= end_date
+        ]
+
+      
+        bar_data.append(len(raised_this_week))
+
+        line_open_data.append(len(open_tickets))
+        line_resolved_data.append(len(resolved_tickets))
+
+
     chart_data = {
         'labels': weeks_labels,
         'barData': bar_data,
@@ -682,50 +722,263 @@ def admin_analytics():
         ai_resolved_pct=ai_resolved_pct,
         peak_day=peak_day,
         peak_day_avg=peak_day_avg,
-        chart_data=chart_data
+        chart_data=chart_data,
+        peak_day_date=peak_day_date
     )   
 
 @app.route('/admin-export')
 def admin_export():
+
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
-    
-    # FIX: Remove .all() here. Keep it as a query object.
+
+
+    global_total = Ticket.query.count()
+
+
     query = Ticket.query
-    
-    # filter parameters:
+
     statuses = request.args.getlist('status')
     categories = request.args.getlist('category')
     priorities = request.args.getlist('priority')
+
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
-    # date filter:
+
+
     if start_date_str and end_date_str:
+
         try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1, seconds=-1)
-            query = query.filter(Ticket.created_at >= start_date, Ticket.created_at <= end_date)
+
+            start_date = datetime.strptime(
+                start_date_str,
+                '%Y-%m-%d'
+            )
+
+            end_date = datetime.strptime(
+                end_date_str,
+                '%Y-%m-%d'
+            ) + timedelta(days=1, seconds=-1)
+
+            query = query.filter(
+                Ticket.created_at >= start_date,
+                Ticket.created_at <= end_date
+            )
+
         except ValueError:
-            pass # Ignore invalid date formats
+            pass
 
-    # status filter:
+
+
     if statuses and 'All' not in statuses:
-        query = query.filter(Ticket.status.in_(statuses))
 
-    # category filter:
+        query = query.filter(
+            Ticket.status.in_(statuses)
+        )
+
+
+
     if categories and 'All' not in categories:
-        query = query.filter(Ticket.category.in_(categories))
 
-    # priority filter:
+        query = query.filter(
+            Ticket.category.in_(categories)
+        )
+
+
+
     if priorities and 'All' not in priorities:
-        query = query.filter(Ticket.priority.in_(priorities))
-        
-    # Now we can safely call count() and order_by() on the query object
-    total_tickets = query.count()
-    preview_tickets = query.order_by(Ticket.created_at.desc()).limit(3).all()   
+
+        query = query.filter(
+            Ticket.priority.in_(priorities)
+        )
+
+
+
+    filtered_total = query.count()
+
+    preview_tickets = query.order_by(
+        Ticket.created_at.desc()
+    ).limit(3).all()
+
+
+    return render_template(
+
+        'AdminExport.html',
+        total=global_total,
+        filtered_total=filtered_total,
+        preview_tickets=preview_tickets
+    )
     
-    return render_template('AdminExport.html', total=total_tickets, preview_tickets=preview_tickets)
+@app.route('/download-export')
+def download_export():
+
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+
+    statuses = request.args.getlist('status')
+    categories = request.args.getlist('category')
+    priorities = request.args.getlist('priority')
+
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    export_format = request.args.get('format', 'excel')
+
+    query = Ticket.query
+
+    try:
+
+        if not start_date_str:
+
+            first_ticket = Ticket.query.order_by(
+                Ticket.created_at.asc()
+            ).first()
+
+            if first_ticket:
+                start_date = first_ticket.created_at
+            else:
+                start_date = datetime.now()
+
+        else:
+
+            start_date = datetime.strptime(
+                start_date_str,
+                '%Y-%m-%d'
+            )
+
+        if not end_date_str:
+
+            end_date = datetime.now()
+
+        else:
+
+            end_date = datetime.strptime(
+                end_date_str,
+                '%Y-%m-%d'
+            ) + timedelta(days=1, seconds=-1)
+
+        query = query.filter(
+            Ticket.created_at >= start_date,
+            Ticket.created_at <= end_date
+        )
+
+    except ValueError:
+        pass
+
+
+    if statuses and 'All' not in statuses:
+
+        query = query.filter(
+            Ticket.status.in_(statuses)
+        )
+
+
+    if categories and 'All' not in categories:
+
+        query = query.filter(
+            Ticket.category.in_(categories)
+        )
+
+    if priorities and 'All' not in priorities:
+
+        query = query.filter(
+            Ticket.priority.in_(priorities)
+        )
+
+    tickets = query.order_by(
+        Ticket.created_at.desc()
+    ).all()
+
+
+    if export_format == 'csv':
+
+        output = StringIO()
+
+        writer = csv.writer(output)
+
+        writer.writerow([
+            'Ticket ID',
+            'Title',
+            'Raised By',
+            'Category',
+            'Priority',
+            'Status',
+            'Created At'
+        ])
+
+        for ticket in tickets:
+
+            writer.writerow([
+                f'T-{ticket.id:03d}',
+                ticket.title,
+                ticket.email,
+                ticket.category,
+                ticket.priority,
+                ticket.status,
+                ticket.created_at.strftime('%d-%m-%Y %H:%M')
+            ])
+
+        response = make_response(output.getvalue())
+
+        response.headers[
+            'Content-Disposition'
+        ] = 'attachment; filename=tickets_export.csv'
+
+        response.headers[
+            'Content-type'
+        ] = 'text/csv'
+
+        return response
+
+
+    wb = Workbook()
+
+    ws = wb.active
+
+    ws.title = "Tickets Report"
+
+    headers = [
+        'Ticket ID',
+        'Title',
+        'Raised By',
+        'Category',
+        'Priority',
+        'Status',
+        'Created At'
+    ]
+
+    ws.append(headers)
+
+    for ticket in tickets:
+
+        ws.append([
+            f'T-{ticket.id:03d}',
+            ticket.title,
+            ticket.email,
+            ticket.category,
+            ticket.priority,
+            ticket.status,
+            ticket.created_at.strftime('%d-%m-%Y %H:%M')
+        ])
+
+    output = BytesIO()
+
+    wb.save(output)
+
+    output.seek(0)
+
+    response = make_response(output.getvalue())
+
+    response.headers[
+        'Content-Disposition'
+    ] = 'attachment; filename=tickets_export.xlsx'
+
+    response.headers[
+        'Content-Type'
+    ] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+    return response    
 
 if __name__ == "__main__":
     app.run(debug=True)

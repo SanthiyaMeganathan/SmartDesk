@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- 1. Toggle Format Buttons (Excel vs CSV) ---
+
     const btnExcel = document.getElementById('btn-excel');
     const btnCsv = document.getElementById('btn-csv');
 
@@ -14,86 +13,231 @@ document.addEventListener('DOMContentLoaded', () => {
         btnExcel.classList.remove('active');
     });
 
-    // --- 2. Logic for 'Status' Checkboxes ---
+
     const statusAll = document.getElementById('status-all');
-    const statusOthers = document.querySelectorAll('.status-cb:not(#status-all)');
 
-    statusAll.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            statusOthers.forEach(cb => cb.checked = false);
-        } else {
-            e.target.checked = true; 
+    const statusCheckboxes =
+        document.querySelectorAll('.status-cb:not(#status-all)');
+
+    statusAll.addEventListener('change', () => {
+
+        if (statusAll.checked) {
+
+            statusCheckboxes.forEach(cb => {
+                cb.checked = false;
+            });
         }
-        updatePreview(); // Trigger update on change
+
+        updatePreview();
     });
 
-    statusOthers.forEach(cb => {
+    statusCheckboxes.forEach(cb => {
+
         cb.addEventListener('change', () => {
-            const anyChecked = Array.from(statusOthers).some(c => c.checked);
-            statusAll.checked = !anyChecked;
-            updatePreview(); // Trigger update on change
+
+            const checkedCount =
+                [...statusCheckboxes]
+                .filter(c => c.checked).length;
+
+            if (checkedCount > 0) {
+                statusAll.checked = false;
+            } else {
+                statusAll.checked = true;
+            }
+
+            updatePreview();
         });
+
     });
 
-    // --- 3. Logic for 'Category' Checkboxes ---
+
+
     const catAll = document.getElementById('cat-all');
-    const catOthers = document.querySelectorAll('.cat-cb:not(#cat-all)');
 
-    catAll.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            catOthers.forEach(cb => cb.checked = false);
-        } else {
-            e.target.checked = true;
+    const catCheckboxes =
+        document.querySelectorAll('.cat-cb:not(#cat-all)');
+
+    catAll.addEventListener('change', () => {
+
+        if (catAll.checked) {
+
+            catCheckboxes.forEach(cb => {
+                cb.checked = false;
+            });
         }
-        updatePreview(); // Trigger update on change
+
+        updatePreview();
     });
 
-    catOthers.forEach(cb => {
+    catCheckboxes.forEach(cb => {
+
         cb.addEventListener('change', () => {
-            const anyChecked = Array.from(catOthers).some(c => c.checked);
-            catAll.checked = !anyChecked;
-            updatePreview(); // Trigger update on change
+
+            const checkedCount =
+                [...catCheckboxes]
+                .filter(c => c.checked).length;
+
+            if (checkedCount > 0) {
+                catAll.checked = false;
+            } else {
+                catAll.checked = true;
+            }
+
+            updatePreview();
         });
+
     });
 
-    // --- 4. Logic for Date Inputs ---
-    document.querySelectorAll('.date-input').forEach(input => {
-        input.addEventListener('change', updatePreview);
-    });
 
-    // --- 5. Unified Filter Update Function ---
-    const updatePreview = () => {
-        // Collect Statuses
-        const statusValues = Array.from(document.querySelectorAll('.status-cb:checked'))
-            .filter(cb => cb.id !== 'status-all')
-            .map(cb => cb.value);
-        
-        // Collect Categories
-        const catValues = Array.from(document.querySelectorAll('.cat-cb:checked'))
-            .filter(cb => cb.id !== 'cat-all')
-            .map(cb => cb.value);
 
-        // Collect Priorities (Assuming you have priority-cb class in HTML)
-        const priorityValues = Array.from(document.querySelectorAll('.priority-cb:checked'))
-            .map(cb => cb.value);
+    const startDate = document.getElementById('start-date');
+    const endDate = document.getElementById('end-date');
 
-        // Construct Query Params
+
+
+    const today =
+        new Date().toISOString().split('T')[0];
+
+    startDate.max = today;
+    endDate.max = today;
+
+    startDate.addEventListener('change', updatePreview);
+    endDate.addEventListener('change', updatePreview);
+
+
+
+    function updatePreview() {
+
         const params = new URLSearchParams();
-        statusValues.forEach(v => params.append('status', v));
-        catValues.forEach(v => params.append('category', v));
-        priorityValues.forEach(v => params.append('priority', v));
-        
-        params.append('start_date', document.getElementById('start-date').value);
-        params.append('end_date', document.getElementById('end-date').value);
 
-        // Reload page with new filters
-        window.location.href = `/admin-export?${params.toString()}`;
-    };
 
-    // --- 6. Placeholder for Download Click ---
-    document.getElementById('download-report-btn').addEventListener('click', () => {
-        const format = btnExcel.classList.contains('active') ? 'Excel' : 'CSV';
-        console.log(`Download triggered. Format: ${format}`);
-    });
+
+        const selectedStatuses =
+            [...statusCheckboxes]
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        selectedStatuses.forEach(status => {
+            params.append('status', status);
+        });
+
+
+
+        const selectedCategories =
+            [...catCheckboxes]
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        selectedCategories.forEach(category => {
+            params.append('category', category);
+        });
+
+
+        if (startDate.value > today) {
+
+            alert(
+                'Start date cannot be greater than today'
+            );
+
+            startDate.value = '';
+            return;
+        }
+
+
+        if (endDate.value > today) {
+
+            alert(
+                'End date cannot be greater than todays date'
+            );
+
+            endDate.value = '';
+            return;
+        }
+
+        if (
+            startDate.value &&
+            endDate.value &&
+            endDate.value < startDate.value
+        ) {
+
+            alert(
+                'End date cannot be lesser than start date'
+            );
+
+            endDate.value = '';
+            return;
+        }
+
+
+
+        if (startDate.value) {
+            params.append(
+                'start_date',
+                startDate.value
+            );
+        }
+
+        if (endDate.value) {
+            params.append(
+                'end_date',
+                endDate.value
+            );
+        }
+
+
+
+        window.location.href =
+            `/admin-export?${params.toString()}`;
+    }
+
+    document.getElementById('download-report-btn')
+        .addEventListener('click', () => {
+
+            const params = new URLSearchParams();
+            const selectedStatuses =
+                [...statusCheckboxes]
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            selectedStatuses.forEach(status => {
+                params.append('status', status);
+            });
+
+
+            const selectedCategories =
+                [...catCheckboxes]
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            selectedCategories.forEach(category => {
+                params.append('category', category);
+            });
+
+
+            if (startDate.value) {
+                params.append(
+                    'start_date',
+                    startDate.value
+                );
+            }
+
+            if (endDate.value) {
+                params.append(
+                    'end_date',
+                    endDate.value
+                );
+            }
+
+
+            const format =
+                btnExcel.classList.contains('active')
+                    ? 'excel'
+                    : 'csv';
+
+            params.append('format', format);
+
+            window.location.href =
+                `/download-export?${params.toString()}`;
+        });
 
 });

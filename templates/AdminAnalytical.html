@@ -1,12 +1,12 @@
 {% extends "AdminSideMacron.html" %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/AdminAnalytical.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/AdminAnalytical.css') }}">
 {% endblock %}
 
 {% block content %}
 <div class="dashboard-wrapper">
-    
+
     <div class="dash-header">
         <div class="dash-title">
             <h2>Analytics</h2>
@@ -26,24 +26,34 @@
     </div>
 
     <div class="main-content-container">
-        
+
         <div class="metrics-row">
             <div class="metric-card">
                 <div class="m-header"><i class="ri-time-line"></i> Avg. resolution time</div>
                 <div class="m-value">{{ avg_days }} <span>days</span></div>
                 <div class="m-trend text-green"><i class="ri-check-double-line"></i> Across all resolved tickets</div>
             </div>
-            
+
             <div class="metric-card">
                 <div class="m-header"><i class="ri-robot-2-line"></i> AI resolved (no ticket raised)</div>
                 <div class="m-value">{{ ai_resolved_count }} <span>sessions</span></div>
                 <div class="m-trend text-gray">{{ ai_resolved_pct }}% of all chat sessions</div>
             </div>
-            
+
             <div class="metric-card">
                 <div class="m-header"><i class="ri-calendar-event-line"></i> Peak ticket day</div>
-                <div class="m-value">{{ peak_day }}</div>
-                <div class="m-trend text-gray">Avg. {{ peak_day_avg }} tickets raised on {{ peak_day }}s</div>
+
+                <div class="m-value">
+                    {{ peak_day }}
+                </div>
+
+                <div class="m-trend text-gray">
+                    Last active peak: {{ peak_day_date }}
+                </div>
+
+                <div class="m-trend text-gray">
+                    Avg. {{ peak_day_avg }} tickets raised on {{ peak_day }}s
+                </div>
             </div>
         </div>
 
@@ -71,12 +81,20 @@
                         </div>
                     </div>
                     <div class="donut-legend">
-                        <div class="leg-item"><span class="dot dot-blue"></span><span class="leg-name">Network</span> <span class="leg-val">{{ chart_data.catCounts['Network'] }}</span> <span class="leg-pct">{{ chart_data.catPct['Network'] }}%</span></div>
-                        <div class="leg-item"><span class="dot dot-orange"></span><span class="leg-name">Access</span> <span class="leg-val">{{ chart_data.catCounts['Access'] }}</span> <span class="leg-pct">{{ chart_data.catPct['Access'] }}%</span></div>
-                        <div class="leg-item"><span class="dot dot-red"></span><span class="leg-name">Software</span> <span class="leg-val">{{ chart_data.catCounts['Software'] }}</span> <span class="leg-pct">{{ chart_data.catPct['Software'] }}%</span></div>
-                        <div class="leg-item"><span class="dot dot-green"></span><span class="leg-name">Hardware</span> <span class="leg-val">{{ chart_data.catCounts['Hardware'] }}</span> <span class="leg-pct">{{ chart_data.catPct['Hardware'] }}%</span></div>
+                        <div class="leg-item"><span class="dot dot-blue"></span><span class="leg-name">Network</span>
+                            <span class="leg-val">{{ chart_data.catCounts['Network'] }}</span> <span class="leg-pct">{{
+                                chart_data.catPct['Network'] }}%</span></div>
+                        <div class="leg-item"><span class="dot dot-orange"></span><span class="leg-name">Access</span>
+                            <span class="leg-val">{{ chart_data.catCounts['Access'] }}</span> <span class="leg-pct">{{
+                                chart_data.catPct['Access'] }}%</span></div>
+                        <div class="leg-item"><span class="dot dot-red"></span><span class="leg-name">Software</span>
+                            <span class="leg-val">{{ chart_data.catCounts['Software'] }}</span> <span class="leg-pct">{{
+                                chart_data.catPct['Software'] }}%</span></div>
+                        <div class="leg-item"><span class="dot dot-green"></span><span class="leg-name">Hardware</span>
+                            <span class="leg-val">{{ chart_data.catCounts['Hardware'] }}</span> <span class="leg-pct">{{
+                                chart_data.catPct['Hardware'] }}%</span></div>
                     </div>
-                    </div>
+                </div>
             </div>
 
             <div class="chart-card half-width">
@@ -128,7 +146,8 @@
                             </div>
                         </td>
                         <td>
-                            <span class="res-badge {% if rep.resolved == rep.total %}all-res{% elif rep.resolved > 0 %}some-res{% else %}no-res{% endif %}">
+                            <span
+                                class="res-badge {% if rep.resolved == rep.total %}all-res{% elif rep.resolved > 0 %}some-res{% else %}no-res{% endif %}">
                                 {{ rep.resolved }} resolved
                             </span>
                         </td>

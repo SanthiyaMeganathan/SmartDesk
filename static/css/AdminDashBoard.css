@@ -102,12 +102,8 @@ body {
 .four-box-container{
     display: flex;
     flex-direction: row;
-    /* MODIFIED: Increased gap for equal spacing between columns */
-    gap: 24px; /* OLD VALUE: gap: 16px; */
-    
-    /* MODIFIED: Adjusted padding to align with header's 32px sides */
-    padding: 24px 32px; /* OLD VALUE: padding: 20px 26px; */
-    
+    gap: 24px; 
+    padding: 24px 32px; 
     width: 100%;
     margin-top: -10px;
 }
@@ -166,13 +162,8 @@ body {
 
 .bottom-sections-container{
     display: flex;
-    /* MODIFIED: Increased gap for equal spacing */
-    gap: 24px; /* OLD VALUE: gap: 16px; */
-    
-    
-    /* MODIFIED: Adjusted padding to align with header and row above */
-    padding: 0px 32px 32px 32px; /* OLD VALUE: padding: 0px 26px 26px 26px; */
-    
+    gap: 24px; 
+    padding: 0px 32px 32px 32px; 
     width: 100%;
     border-radius: 20%;
 }
@@ -403,7 +394,7 @@ body {
 .s-progress { background-color: #fef3c7; color: #d97706; }
 .s-resolved { background-color: #f0fdf4; color: #16a34a; }
 
-/*Style for employee side bar*/
+
 
 .my-tickets{
     color: #10b981;

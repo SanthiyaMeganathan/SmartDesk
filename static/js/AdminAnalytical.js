@@ -33,12 +33,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         stepSize: 5, 
                         color: '#9ca3af', 
                         font: {size: 11},
-                        padding: 8 // <-- Keeps the numbers spaced slightly away from the line
+                        padding: 8 
                     },
                     grid: { 
                         display: true, 
                         color: '#e5e7eb',
-                        drawTicks: false // <-- Removes the protruding tick marks on the left
+                        drawTicks: false 
                     },
                     border: { display: true, color: '#e5e7eb' }
                 },
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     grid: { 
                         display: true, 
                         color: '#e5e7eb',
-                        drawTicks: false // <-- Removes the protruding tick marks on the bottom
+                        drawTicks: false 
                     },
                     border: { display: true, color: '#e5e7eb' }
                 }
@@ -59,7 +59,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-   // 2. DONUT CHART using dynamic data
     const donutCtx = document.getElementById('donutChart').getContext('2d');
     new Chart(donutCtx, {
         type: 'doughnut',
@@ -82,7 +81,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // 3. LINE CHART using dynamic Open vs Resolved data
     const lineCtx = document.getElementById('lineChart').getContext('2d');
     new Chart(lineCtx, {
         type: 'line',
@@ -93,23 +91,22 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: 'Open',
                     data: chartData.lineOpen, 
                     borderColor: '#ef4444', 
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)', // Light transparent red for fill
-                    borderWidth: 2,
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
                     tension: 0.4, 
                     pointRadius: 4,
                     pointBackgroundColor: '#ef4444',
-                    fill: true // Enables the background color fill
+                    fill: true 
                 },
                 {
                     label: 'Resolved',
                     data: chartData.lineResolved, 
                     borderColor: '#10b981', 
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)', // Light transparent green for fill
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)', 
                     borderWidth: 2,
                     tension: 0.4,
                     pointRadius: 4,
                     pointBackgroundColor: '#10b981',
-                    fill: true // Enables the background color fill
+                    fill: true 
                 }
             ]
         },
@@ -120,9 +117,9 @@ document.addEventListener("DOMContentLoaded", function () {
             scales: {
                 y: {
                     beginAtZero: true,
-                    max: 20, // Forces the maximum value to 20
+                    max: 20,
                     ticks: { 
-                        stepSize: 4, // Maintains the 0, 4, 8, 12, 16, 20 intervals
+                        stepSize: 4, 
                         color: '#9ca3af', 
                         font: {size: 11} 
                     },

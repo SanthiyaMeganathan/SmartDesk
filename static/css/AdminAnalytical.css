@@ -87,7 +87,7 @@
     overflow-y: auto; 
 }
 
-/* Metric Cards */
+
 .metrics-row {
     display: flex;
     gap: 20px;
@@ -136,7 +136,7 @@
 .text-green { color: #10b981; }
 .text-gray { color: #9ca3af; }
 
-/* Chart Cards */
+
 .chart-card {
     background: white;
     border: 1px solid #e5e7eb;
@@ -160,12 +160,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    /* --- Full-width line settings below --- */
     padding-bottom: 15px; 
     border-bottom: 1px solid #e5e7eb; 
-    margin-left: -20px;  /* Pulls the header to the left edge of the card */
-    margin-right: -20px; /* Pulls the header to the right edge of the card */
-    padding-left: 20px;  /* Keeps the text aligned perfectly */
+    margin-left: -20px; 
+    margin-right: -20px; 
+    padding-left: 20px;  
     padding-right: 20px;
 }
 
@@ -192,7 +191,7 @@
     width: 100%;
 }
 
-/* Donut Chart Layout */
+
 .donut-container {
     display: flex;
     align-items: center;
@@ -223,7 +222,7 @@
     margin: 0;
 }
 
-/* --- NEW CSS CHANGES FOR LEGEND ALIGNMENT --- */
+
 .donut-legend {
     display: flex;
     flex-direction: column;
@@ -270,7 +269,7 @@
     text-align: right;
     margin-left: 10px;
 }
-/* ------------------------------------------- */
+
 
 .custom-legend {
     display: flex;
@@ -280,7 +279,7 @@
 .line-red { width: 12px; height: 3px; background: #ef4444; display: inline-block;}
 .line-green { width: 12px; height: 3px; background: #10b981; display: inline-block;}
 
-/* Reporters Table */
+
 .reporters-table {
     width: 100%;
     border-collapse: collapse;
