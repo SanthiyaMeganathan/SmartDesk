@@ -6,13 +6,16 @@
 
 .dashboard-wrapper {
     background-color: #f9fafb;
-    height: 100vh; 
-    overflow: hidden; 
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
     color: #111827;
 }
 
-/* Header Styles */
+/* =========================
+   HEADER
+========================= */
+
 .dash-header {
     display: flex;
     justify-content: space-between;
@@ -20,10 +23,7 @@
     background-color: white;
     padding: 10px 32px;
     border-bottom: 1px solid #e5e7eb;
-    height: 60px; 
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    height: 60px;
 }
 
 .dash-title {
@@ -35,7 +35,6 @@
 .dash-title h2 {
     font-size: 1.2rem;
     font-weight: 650;
-    margin: 0;
 }
 
 .subtitle {
@@ -44,30 +43,31 @@
     font-weight: 500;
 }
 
-/* Layout for Sidebar and Table */
+/* =========================
+   MAIN LAYOUT
+========================= */
+
 .main-content-container {
     padding: 24px 32px;
     display: flex;
-    gap: 20px; 
-    height: calc(100vh - 60px); 
-    overflow: hidden; 
-    align-items: flex-start; 
+    gap: 20px;
+    align-items: flex-start;
 }
 
-/* --- SIDEBAR STYLES --- */
+/* =========================
+   SIDEBAR
+========================= */
+
 .export-sidebar {
-    width: 380px; 
+    width: 380px;
     background-color: white;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    display: flex;
-    flex-direction: column;
     flex-shrink: 0;
-    height: fit-content; 
 }
 
 .filter-section {
-    padding: 16px 24px; 
+    padding: 16px 24px;
     border-bottom: 1px solid #e5e7eb;
 }
 
@@ -79,10 +79,13 @@
     font-size: 0.875rem;
     font-weight: 600;
     color: #374151;
-    margin-bottom: 10px; 
+    margin-bottom: 10px;
 }
 
-/* Date Range Inputs */
+/* =========================
+   DATE INPUTS
+========================= */
+
 .date-range-inputs {
     display: flex;
     gap: 12px;
@@ -95,20 +98,21 @@
     border-radius: 6px;
     font-size: 0.85rem;
     color: #4b5563;
-    font-family: inherit;
     outline: none;
-    cursor: pointer;
 }
 
 .date-input:focus {
     border-color: #111827;
 }
 
-/* Custom Checkboxes */
+/* =========================
+   CHECKBOXES
+========================= */
+
 .checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: 10px; 
+    gap: 10px;
 }
 
 .custom-checkbox {
@@ -116,31 +120,22 @@
     align-items: center;
     gap: 10px;
     cursor: pointer;
-    user-select: none;
 }
 
 .custom-checkbox input {
     position: absolute;
     opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
 }
 
 .checkmark {
-    height: 16px;
     width: 16px;
-    background-color: white;
+    height: 16px;
     border: 1px solid #d1d5db;
     border-radius: 4px;
+    background-color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.custom-checkbox:hover input ~ .checkmark {
-    border-color: #9ca3af;
 }
 
 .custom-checkbox input:checked ~ .checkmark {
@@ -160,16 +155,13 @@
 
 .cb-label {
     font-size: 0.875rem;
-    color: #4b5563; 
-    transition: color 0.2s ease;
+    color: #4b5563;
 }
 
-.custom-checkbox input:checked ~ .cb-label {
-    color: #111827;
-    font-weight: 500;
-}
+/* =========================
+   FORMAT BUTTONS
+========================= */
 
-/* Export Format Toggle Buttons */
 .format-toggle-group {
     display: flex;
     gap: 8px;
@@ -182,38 +174,26 @@
     justify-content: center;
     gap: 6px;
     padding: 8px;
-    background-color: white;
     border: 1px solid #d1d5db;
     border-radius: 6px;
+    background-color: white;
     color: #6b7280;
     font-size: 0.85rem;
-    font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-}
-
-.format-btn i {
-    font-size: 1rem;
-}
-
-.format-btn:hover {
-    background-color: #f9fafb;
 }
 
 .format-btn.active {
     background-color: #111827;
-    border-color: #111827;
     color: white;
+    border-color: #111827;
 }
 
-/* Download Button */
+/* =========================
+   DOWNLOAD BUTTON
+========================= */
+
 .download-btn {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
     padding: 10px;
     background-color: #111827;
     color: white;
@@ -222,27 +202,20 @@
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.2s ease;
-    font-family: inherit;
 }
 
-.download-btn:hover {
-    background-color: #1f2937;
-}
+/* =========================
+   EXPORT PREVIEW BOX
+========================= */
 
-/* --- EXPORT PREVIEW BOX STYLES --- */
 .export-preview-box {
-    flex: 1; 
-    min-width: 0; 
+    flex: 1;
     background-color: white;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    height: fit-content;
+    overflow: hidden;
 }
 
-/* Header */
 .ep-header {
     display: flex;
     justify-content: space-between;
@@ -257,127 +230,215 @@
     gap: 8px;
     font-size: 0.95rem;
     font-weight: 600;
-    color: #111827;
-}
-
-.ep-header-left i {
-    color: #6b7280;
-    font-size: 1.1rem;
 }
 
 .ep-header-right {
     font-size: 0.8rem;
     color: #9ca3af;
-    font-weight: 500;
 }
 
-/* Table Container */
-.ep-table-container {
-    padding: 0 24px;
-    overflow: hidden; /* Ensures no internal scrolling */
+/* =========================
+   TABLE
+========================= */
+
+.export-table-container {
+    overflow: hidden;
 }
 
-.ep-table {
+.export-ticket-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    table-layout: fixed; /* CRITICAL FIX: Locks columns tightly in place */
+    table-layout: fixed;
 }
 
-/* Enforcing strict column widths so they sit perfectly under headers */
-.ep-table th:nth-child(1) { width: 10%; } /* Ticket ID */
-.ep-table th:nth-child(2) { width: 32%; } /* Title */
-.ep-table th:nth-child(3) { width: 16%; } /* Raised by */
-.ep-table th:nth-child(4) { width: 11%; } /* Category */
-.ep-table th:nth-child(5) { width: 10%; } /* Priority */
-.ep-table th:nth-child(6) { width: 11%; } /* Status */
-.ep-table th:nth-child(7) { width: 10%; } /* Created */
-
-.ep-table th {
-    padding: 16px 8px;
-    font-size: 0.75rem;
+.export-ticket-table th {
+    padding: 14px 12px;
+    font-size: 0.8rem;
     color: #9ca3af;
     font-weight: 500;
     border-bottom: 1px solid #e5e7eb;
-    white-space: nowrap; 
+    background-color: #f9fafb;
 }
 
-.ep-table td {
-    padding: 16px 8px;
-    font-size: 0.85rem;
-    color: #374151;
-    border-bottom: 1px solid #f3f4f6;
+.export-ticket-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #e5e7eb;
     vertical-align: middle;
-    /* CRITICAL FIX: Truncates long text gracefully instead of pushing layout */
-    white-space: nowrap; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
 }
 
-.ep-table tr:last-child td {
+.export-ticket-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-.ep-title {
+/* =========================
+   TEXT
+========================= */
+
+.t-id {
+    color: #9ca3af;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.t-title-col {
+    width:240px;
+    max-width:240px;
+}
+
+.t-title {
+    width: 220px;
     color: #111827;
     font-weight: 500;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-
-.ep-email, .ep-date {
+.t-email {
+    width: 65px;
+    max-width: 65px;
     color: #6b7280;
+    font-size: 0.83rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Badges */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    flex-shrink: 0; /* CRITICAL FIX: Stops the badges from getting squished invisible */
-}
-
-.badge i {
+.t-date {
+    color: #9ca3af;
     font-size: 0.85rem;
 }
 
-/* Category Badge */
-.badge-cat {
+/* =========================
+   PRIORITY
+========================= */
+
+.priority {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.p-high {
+    color: #ef4444;
+}
+
+.p-med {
+    color: #d97706;
+}
+
+.p-low {
+    color: #10b981;
+}
+
+/* =========================
+   CATEGORY BADGES
+========================= */
+
+.cat-badge {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.cat-software,
+.cat-access {
     background-color: #f3f4f6;
     color: #4b5563;
 }
 
-/* Priority Badges */
-.badge-prio-high {
-    color: #dc2626; /* Red */
-}
-.badge-prio-med {
-    color: #d97706; /* Orange/Yellow */
-}
-.badge-prio-low {
-    color: #059669; /* Green */
+.cat-network {
+    background-color: #eff6ff;
+    color: #3b82f6;
 }
 
-/* Status Badges */
-.badge-stat-resolved {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-.badge-stat-progress {
+.cat-hardware {
     background-color: #fef3c7;
-    color: #92400e;
-}
-.badge-stat-open {
-    background-color: #fee2e2;
-    color: #991b1b;
+    color: #d97706;
 }
 
-/* Footer */
+/* =========================
+   STATUS
+========================= */
+
+.status-badge-select {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    pointer-events: none;
+}
+
+.s-open {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.s-in-progress {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.s-resolved {
+    background-color: #f0fdf4;
+    color: #16a34a;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
 .ep-footer {
     padding: 16px 24px;
     font-size: 0.8rem;
     color: #9ca3af;
     border-top: 1px solid #e5e7eb;
+}
+
+/* Column Width Control */
+
+.export-ticket-table th:nth-child(1),
+.export-ticket-table td:nth-child(1) {
+    width: 8%;
+}
+
+.export-ticket-table th:nth-child(2),
+.export-ticket-table td:nth-child(2) {
+    width: 30%;
+}
+
+.export-ticket-table th:nth-child(3),
+.export-ticket-table td:nth-child(3) {
+    width: 14%;
+}
+
+.export-ticket-table th:nth-child(4),
+.export-ticket-table td:nth-child(4) {
+    width: 12%;
+}
+
+.export-ticket-table th:nth-child(5),
+.export-ticket-table td:nth-child(5) {
+    width: 10%;
+}
+
+.export-ticket-table th:nth-child(6),
+.export-ticket-table td:nth-child(6) {
+    width: 12%;
+}
+
+.export-ticket-table th:nth-child(7),
+.export-ticket-table td:nth-child(7) {
+    width: 11%;
+    white-space: nowrap;
+}
+.priority,
+.status-badge-select,
+.cat-badge {
+    white-space: nowrap;
 }
