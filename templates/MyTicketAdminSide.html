@@ -23,10 +23,10 @@
 
     <div class="main-content-container">
         
-        <form method="GET" action="{{ url_for('myticketadminside') }}" class="table-actions-row">
+        <div class="table-actions-row">
             <div class="filter-section">
                 <div class="filter-group">
-                    <select name="status">
+                    <select id="status-filter" name="status">
                         <option value="All" {% if request.args.get('status') == 'All' or not request.args.get('status') %}selected{% endif %}>Status: All</option>
                         <option value="Open" {% if request.args.get('status') == 'Open' %}selected{% endif %}>Open</option>
                         <option value="In Progress" {% if request.args.get('status') == 'In Progress' %}selected{% endif %}>In Progress</option>
@@ -34,16 +34,15 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <select name="category">
+                    <select id="category-filter" name="category">
                         <option value="All" {% if request.args.get('category') == 'All' or not request.args.get('category') %}selected{% endif %}>Category: All</option>
-                        <option value="Access" {% if request.args.get('category') == 'Access' %}selected{% endif %}>Access</option>
-                        <option value="Software" {% if request.args.get('category') == 'Software' %}selected{% endif %}>Software</option>
-                        <option value="Hardware" {% if request.args.get('category') == 'Hardware' %}selected{% endif %}>Hardware</option>
-                        <option value="Network" {% if request.args.get('category') == 'Network' %}selected{% endif %}>Network</option>
+                        {% for cat in db_categories %}
+                        <option value="{{ cat.name }}" {% if request.args.get('category') == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="filter-group">
-                    <select name="priority">
+                    <select id="priority-filter" name="priority">
                         <option value="All" {% if request.args.get('priority') == 'All' or not request.args.get('priority') %}selected{% endif %}>Priority: All</option>
                         <option value="Low" {% if request.args.get('priority') == 'Low' %}selected{% endif %}>Low</option>
                         <option value="Medium" {% if request.args.get('priority') == 'Medium' %}selected{% endif %}>Medium</option>
@@ -51,7 +50,7 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <select name="date">
+                    <select id="date-filter" name="date">
                         <option value="All" {% if request.args.get('date') == 'All' or not request.args.get('date') %}selected{% endif %}>Date: All Time</option>
                         <option value="This week" {% if request.args.get('date') == 'This week' %}selected{% endif %}>This week</option>
                         <option value="This Month" {% if request.args.get('date') == 'This Month' %}selected{% endif %}>This Month</option>
@@ -61,10 +60,11 @@
             </div>
             
             <div class="action-buttons">
-                <button type="submit" class="btn-secondary"><i class="ri-equalizer-line"></i> Filter</button>
-                <button type="button" class="btn-secondary"><i class="ri-download-2-line"></i> Export</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='{{ url_for('admin_export') }}'">
+                    <i class="ri-download-2-line"></i> Export
+                </button>
             </div>
-        </form>
+        </div>
 
         <div class="table-container">
             <table class="emp-ticket-table">
@@ -82,7 +82,11 @@
                 </thead>
                 <tbody class="table-body">
                     {% for ticket in tickets %}
-                    <tr class="ticket-row">
+                    <tr class="ticket-row" 
+                        data-status="{{ ticket.status }}" 
+                        data-category="{{ ticket.category }}" 
+                        data-priority="{{ ticket.priority }}" 
+                        data-date="{{ ticket.created_at.isoformat() if ticket.created_at else '' }}">
                         <td><input type="checkbox" class="ticket-checkbox"></td>
                         <td class="t-id">T-{{ "%03d" | format(ticket.id) }}</td>
                         <td class="t-title-col">
@@ -91,7 +95,9 @@
                         </td>
                         <td class="t-email">{{ ticket.email }}</td>
                         <td>
-                            <span class="cat-badge cat-{{ ticket.category|lower|replace(' ', '-') }}">
+                            {% set cat_key = ticket.category|lower %}
+                            {% set cat_color = category_colors.get(cat_key, '#4b5563') %}
+                            <span class="cat-badge" style="color: {{ cat_color }}; background-color: {{ cat_color }}26;">
                                 {{ ticket.category }}
                             </span>
                         </td>

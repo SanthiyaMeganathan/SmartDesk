@@ -110,5 +110,13 @@
     </main>
 </div>
 
+<script>
+    window.ticketCategories = [
+        {% for cat in categories %}
+        "{{ cat.name }}",
+        {% endfor %}
+    ];
+</script>
+
 <script src="{{ url_for('static', filename='js/ChatBot.js') }}"></script>
 {% endblock %}

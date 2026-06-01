@@ -1,0 +1,101 @@
+{% extends "AdminSideMacron.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/AdminCategories.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    
+    <div class="dash-header">
+        <div class="dash-title">
+            <h2>Categories</h2>
+            <span class="subtitle">Manage ticket categories</span>
+        </div>
+    </div>
+
+    <div class="main-content-container">
+        <div class="categories-layout">
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <i class="ri-function-line"></i> Current categories
+                    </div>
+                    <div class="panel-meta">{{ total_cats }} categories</div>
+                </div>
+                
+                <div class="category-list">
+                    {% for cat in categories %}
+                    <div class="category-item">
+                        <div class="cat-info">
+                            <span class="color-dot" style="background-color: {{ cat.color }};"></span>
+                            <span class="cat-name">{{ cat.name }}</span>
+                        </div>
+                        <div class="cat-actions">
+                            <span class="ticket-count">{{ cat.tickets }} tickets</span>
+                            <button class="action-btn edit-btn" title="Edit" 
+                                onclick="openEditMode({{ cat.id }}, '{{ cat.name }}', '{{ cat.desc or '' }}', '{{ cat.color }}')">
+                                <i class="ri-edit-line"></i>
+                            </button>
+                            <button class="action-btn delete-btn" title="Delete" 
+                                onclick="deleteCategory({{ cat.id }})">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header border-bottom">
+                    <div class="panel-title" id="formTitle">Add new category</div>
+                </div>
+                
+                <div class="panel-body">
+                    <form id="addCategoryForm" class="category-form">
+                        <input type="hidden" id="editCatId" value="">
+                        
+                        <div class="form-group">
+                            <label for="catName">Category name</label>
+                            <input type="text" id="catName" name="category_name" placeholder="e.g. Security" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="catDesc">Description (optional)</label>
+                            <input type="text" id="catDesc" name="description" placeholder="Brief description">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color</label>
+                            <div class="color-picker" id="colorPicker">
+                                {% for color in all_colors %}
+                                    {% set is_used = color in used_colors %}
+                                    <label class="color-swatch {% if is_used %}disabled backend-disabled{% endif %}" 
+                                           style="background-color: {{ color }};" 
+                                           data-color="{{ color }}"
+                                           {% if is_used %}title="Color already in use"{% endif %}>
+                                        <input type="radio" name="color" value="{{ color }}" {% if is_used %}disabled{% endif %}>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn-submit" id="submitBtn" onclick="submitCategory()">
+                                <i class="ri-add-line"></i> Add category
+                            </button>
+                            <button type="button" class="btn-cancel" id="cancelBtn" style="display: none;" onclick="resetForm()">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/AdminCategories.js') }}"></script>
+{% endblock %}

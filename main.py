@@ -52,10 +52,26 @@ class ConversationHistory(db.Model):
     session_id = db.Column(db.String(100), nullable=False)
     user_message = db.Column(db.Text, nullable=False)
     bot_response = db.Column(db.Text, nullable=False)    
+    
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    description = db.Column(db.String(200), nullable=True)
+    color = db.Column(db.String(20), nullable=False, unique=True)
 
 
 with app.app_context():
     db.create_all()
+    default_cats = [
+        {'name': 'Network', 'desc': 'Network related issues', 'color': '#3b82f6'},
+        {'name': 'Access', 'desc': 'Login and access issues', 'color': '#f59e0b'},
+        {'name': 'Software', 'desc': 'Application issues', 'color': '#ef4444'},
+        {'name': 'Hardware', 'desc': 'Device and equipment issues', 'color': '#10b981'}
+    ]
+    for cat in default_cats:
+        if not Category.query.filter_by(name=cat['name']).first():
+            new_cat = Category(name=cat['name'], description=cat['desc'], color=cat['color'])
+            db.session.add(new_cat)
     
     if not Admin_loginDetails.query.filter_by(email='admin@smartdesk.com').first():
         admin_user = Admin_loginDetails(
@@ -157,16 +173,22 @@ def employee_dashboard():
     
     user_email = session['email']
     my_tickets = Ticket.query.filter_by(email=user_email).all()
-    open_count=sum(1 for ticket in my_tickets if ticket.status== 'Open')
-    in_progress_count=sum(1 for ticket in my_tickets if ticket.status== 'In Progress')
-    closed_count=sum(1 for ticket in my_tickets if ticket.status == 'Resolved')
+    open_count = sum(1 for ticket in my_tickets if ticket.status == 'Open')
+    in_progress_count = sum(1 for ticket in my_tickets if ticket.status == 'In Progress')
+    closed_count = sum(1 for ticket in my_tickets if ticket.status == 'Resolved')
+
+    db_categories = Category.query.all()
+    category_colors = {cat.name.lower(): cat.color for cat in db_categories}
+
     return render_template(
         'EmployeeDashboard.html', 
         tickets=my_tickets,
         open_count=open_count,
         in_progress_count=in_progress_count,
-        closed_count=closed_count
-        )
+        closed_count=closed_count,
+        category_colors=category_colors,
+        db_categories=db_categories
+    )
 
 
 @app.route('/chat-bot')
@@ -190,13 +212,16 @@ def render_chatbot():
             tickets_yesterday.append(ticket)
         else:
             tickets_earlier.append(ticket)
- 
+
+    db_categories = Category.query.all()
+
     return render_template(
         'ChatBot.html', 
         tickets=my_tickets,
         tickets_today=tickets_today,
         tickets_yesterday=tickets_yesterday,
-        tickets_earlier=tickets_earlier
+        tickets_earlier=tickets_earlier,
+        categories=db_categories
     )
 
 
@@ -204,7 +229,6 @@ def render_chatbot():
 @app.route('/api/new-chat', methods=['POST'])
 def new_chat():
     new_session = str(uuid.uuid4())
-  
     return jsonify({"session_id": new_session})
 
 
@@ -348,9 +372,12 @@ def chatbot_api():
     current_session_id = data.get('session_id')
     
     if not current_session_id:
-        current_session_id = str(uuid.uuid4()) # Fallback safeguard
+        current_session_id = str(uuid.uuid4()) 
 
     rag_context = search_knowledge_base(user_message)
+
+    active_categories = [cat.name for cat in Category.query.all()]
+    categories_string = ", ".join(active_categories) if active_categories else "Network, Hardware, Software, Access"
     
     system_prompt = f"""
     
@@ -379,7 +406,7 @@ Escalation: If a RAG solution was provided but the user says it did not resolve 
 
 Phase 2: Ticket Data Gathering (Only initiate if user says Yes in Phase 1)
 
-Category: Identify if the issue is Network, Hardware, Software, or Access. Try to infer from the conversation first before asking. Maximum avoid asking and you try to find out by your own!
+Category: Identify if the issue fits into one of these categories: {categories_string}. Try to infer from the conversation first before asking. Maximum avoid asking and you try to find out by your own!
 
 Description: Ask the user to describe what they are experiencing in more detail.
 
@@ -538,16 +565,13 @@ def myticketadminside():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
 
-   
     status_filter = request.args.get('status', 'All')
     category_filter = request.args.get('category', 'All')
     priority_filter = request.args.get('priority', 'All')
     date_filter = request.args.get('date', 'All')
 
-    
     query = Ticket.query
 
-   
     if status_filter != 'All':
         query = query.filter(Ticket.status == status_filter)
     if category_filter != 'All':
@@ -558,24 +582,35 @@ def myticketadminside():
     if date_filter != 'All':
         now = datetime.now()
         if date_filter == 'This week':
-            start_date = now - timedelta(days=7)
+     
+            start_date = now - timedelta(days=now.weekday())
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
             query = query.filter(Ticket.created_at >= start_date)
+            
         elif date_filter == 'This Month':
-            start_date = now - timedelta(days=30)
+     
+            start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
             query = query.filter(Ticket.created_at >= start_date)
+            
         elif date_filter == 'Within 3 months':
+  
             start_date = now - timedelta(days=90)
             query = query.filter(Ticket.created_at >= start_date)
 
    
+    db_categories = Category.query.all()
+    category_colors = {cat.name.lower(): cat.color for cat in db_categories}
+
     filtered_tickets = query.order_by(Ticket.created_at.desc()).all()
     total_tickets = Ticket.query.count()
+    
     return render_template(
         'MyTicketAdminSide.html', 
         tickets=filtered_tickets,
-        total=total_tickets
+        total=total_tickets,
+        db_categories=db_categories,
+        category_colors=category_colors
     )
-    
 
 @app.route('/admin-analytics')
 def admin_analytics():
@@ -979,6 +1014,103 @@ def download_export():
     ] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
     return response    
+
+@app.route('/admin-categories')
+def admin_categories():
+    if session.get('role') != 'admin':
+        return redirect(url_for('admin_login'))
+    
+
+    db_categories = Category.query.all()
+    category_data = []
+    used_colors = []
+
+    for cat in db_categories:
+     
+        ticket_count = Ticket.query.filter_by(category=cat.name).count()
+        category_data.append({
+            'id': cat.id,           
+            'name': cat.name,
+            'desc': cat.description, 
+            'tickets': ticket_count,
+            'color': cat.color
+        })
+        used_colors.append(cat.color)
+
+    all_colors = ['#3b82f6', '#f59e0b', '#ef4444', '#10b981', '#8b5cf6', '#0ea5e9', '#1f2937']
+    
+    return render_template(
+        'AdminCategories.html', 
+        categories=category_data,
+        total_cats=len(category_data),
+        used_colors=used_colors,
+        all_colors=all_colors
+    )
+
+@app.route('/add-category', methods=['POST'])
+def add_category():
+    if session.get('role') != 'admin':
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    data = request.get_json()
+    cat_name = data.get('category_name')
+    desc = data.get('description')
+    color = data.get('color')
+
+    if not cat_name or not color:
+        return jsonify({"status": "error", "message": "Name and color are required."}), 400
+
+    if Category.query.filter_by(name=cat_name).first():
+        return jsonify({"status": "error", "message": "Category name already exists."}), 400
+    if Category.query.filter_by(color=color).first():
+        return jsonify({"status": "error", "message": "This color is already in use."}), 400
+
+    new_cat = Category(name=cat_name, description=desc, color=color)
+    db.session.add(new_cat)
+    db.session.commit()
+
+    return jsonify({"status": "success", "message": "Category added!"})
+
+@app.route('/edit-category/<int:cat_id>', methods=['POST'])
+def edit_category(cat_id):
+    if session.get('role') != 'admin':
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    category = Category.query.get_or_404(cat_id)
+    data = request.get_json()
+    new_name = data.get('category_name')
+    new_desc = data.get('description')
+    new_color = data.get('color')
+
+    if not new_name or not new_color:
+        return jsonify({"status": "error", "message": "Name and color are required."}), 400
+
+    if Category.query.filter(Category.name == new_name, Category.id != cat_id).first():
+        return jsonify({"status": "error", "message": "Category name already exists."}), 400
+    if Category.query.filter(Category.color == new_color, Category.id != cat_id).first():
+        return jsonify({"status": "error", "message": "This color is already in use."}), 400
+
+    if category.name != new_name:
+        Ticket.query.filter_by(category=category.name).update({'category': new_name})
+
+    category.name = new_name
+    category.description = new_desc
+    category.color = new_color
+    db.session.commit()
+
+    return jsonify({"status": "success", "message": "Category updated!"})
+
+@app.route('/delete-category/<int:cat_id>', methods=['DELETE'])
+def delete_category(cat_id):
+    if session.get('role') != 'admin':
+        return jsonify({"status": "error", "message": "Unauthorized"}), 401
+
+    category = Category.query.get_or_404(cat_id)
+
+    db.session.delete(category)
+    db.session.commit()
+
+    return jsonify({"status": "success", "message": "Category deleted!"})
 
 if __name__ == "__main__":
     app.run(debug=True)

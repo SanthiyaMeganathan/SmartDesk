@@ -1,10 +1,8 @@
 *{
-  
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
-
 
 html , body {
     height: 100%;
@@ -22,7 +20,6 @@ html , body {
     width: 100%;
 }
 
-
 .dash-header {
     display: flex;
     justify-content: space-between;
@@ -30,12 +27,10 @@ html , body {
     background-color: white;
     padding:7px 32px;
     border-bottom: 1px solid #e5e7eb;
-
     height: 60px;
     flex-shrink: 0;
     overflow: hidden;
 }
-
 
 .dash-title {
     display: flex;
@@ -57,13 +52,11 @@ html , body {
     font-weight: 500;
 }
 
-
 .dash-actions {
     display: flex;
     flex-direction: row;
     gap: 15px;
 }
-
 
 .search-bar {
     display: flex;
@@ -73,8 +66,6 @@ html , body {
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     padding: 8px 15px;
-    width: 260px;
-
     width: 260px;
     flex-shrink: 1;    
     min-width: 120px;
@@ -95,7 +86,6 @@ html , body {
     color: #4b5563;
 }
 
-
 .btn-new-ticket {
     background-color:black; 
     color: white;
@@ -109,7 +99,6 @@ html , body {
     align-items: center;
     gap: 8px;
     transition: background-color 0.2s;
-
     white-space: nowrap; 
     flex-shrink: 0;
 }
@@ -120,15 +109,6 @@ html , body {
 
 .btn-new-ticket i {
     font-size: 1.1rem;
-}
-
-
-.dashboard-wrapper {
-    background-color: #f9fafb;
-    min-height: 100vh;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    color: #000000;
-    width: 100%;
 }
 
 .four-box-container {
@@ -185,7 +165,6 @@ html , body {
     font-weight: 500;
 }
 
-
 .main-content-container {
     padding: 0 26px 26px 26px;
 }
@@ -214,7 +193,6 @@ html , body {
     border-color: #3b82f6;
 }
 
-
 .text-green { color: #10b981; }
 .text-red { color: #ef4444; }
 .text-orange { color: #f59e0b; }
@@ -235,7 +213,6 @@ html , body {
     margin-right: -6px;
 }
 
-/* MINION FIX: Makes buttons look unclickable when there are no more pages */
 .page-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
@@ -248,7 +225,6 @@ html , body {
     padding: 0;
     border-collapse: collapse;
     text-align: left;
-    
 }
 
 .emp-ticket-table th {
@@ -258,18 +234,13 @@ html , body {
     font-weight: 500;
     border-bottom: 1px solid #e5e7eb;
     background-color: #f9fafb;
-   
 }
 
 .emp-ticket-table td {
     padding: 8px 20px;
     border-bottom: 1px solid #e5e7eb;
     vertical-align: middle;
-    
-    
-    
 }
-
 
 .emp-ticket-table tbody tr:last-child td {
     border-bottom: none;
@@ -293,7 +264,6 @@ html , body {
 }
 
 .t-desc {
-   
     color: #9ca3af;
     font-size: 0.8rem;
     white-space: nowrap;
@@ -305,7 +275,6 @@ html , body {
     color: #9ca3af;
     font-size: 0.85rem;
 }
-
 
 .priority {
     display: flex;
@@ -333,15 +302,10 @@ html , body {
     padding: 4px 10px;
     border-radius: 6px;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
+    display: inline-block;
+    white-space: nowrap;
 }
-
-.cat-software, .cat-access { background-color: #f3f4f6; color: #4b5563; }
-
-.cat-network { background-color: #eff6ff; color: #3b82f6; }
-
-.cat-hardware { background-color: #fef3c7; color: #d97706; }
-
 
 .pagination-footer {
     display: flex;
@@ -384,7 +348,6 @@ html , body {
     background-color: #f9fafb;
 }
 
-/* Active Black Button */
 .page-btn.active {
     background-color: #111827;
     color: white;

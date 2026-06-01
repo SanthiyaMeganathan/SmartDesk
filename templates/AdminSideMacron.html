@@ -26,12 +26,14 @@
         <div class="nav-container">
             <div class="nav-group">
                 <span class="label">MAIN</span>
-                <a href="{{ url_for('admin_dashboard') }}" class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <a href="{{ url_for('admin_dashboard') }}"
+                    class="nav-item {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
                     <i class="ri-dashboard-line"></i>
                     DashBoard
                 </a>
-                
-                <a href="{{ url_for('myticketadminside') }}" class="nav-item {% if request.endpoint == 'myticketadminside' %}active{% endif %}">
+
+                <a href="{{ url_for('myticketadminside') }}"
+                    class="nav-item {% if request.endpoint == 'myticketadminside' %}active{% endif %}">
                     <i class="ri-coupon-2-line"></i>
                     All Tickets
                     <span class="badge-ticket">{{ total }}</span>
@@ -40,11 +42,13 @@
 
             <div class="nav-group-report">
                 <span class="label">REPORTS</span>
-                <a href="{{ url_for('admin_analytics') }}" class="nav-item {% if request.endpoint == 'admin_analytics' %}active{% endif %}">
+                <a href="{{ url_for('admin_analytics') }}"
+                    class="nav-item {% if request.endpoint == 'admin_analytics' %}active{% endif %}">
                     <i class="ri-bar-chart-2-line"></i>
                     Analytics
                 </a>
-                <a href="{{ url_for('admin_export') }}" class="nav-item {% if request.endpoint == 'admin_export' %}active{% endif %}">
+                <a href="{{ url_for('admin_export') }}"
+                    class="nav-item {% if request.endpoint == 'admin_export' %}active{% endif %}">
                     <i class="ri-export-line"></i>
                     Export
                 </a>
@@ -52,7 +56,8 @@
 
             <div class="nav-group">
                 <span class="label">CONFIG</span>
-                <a href="#" class="nav-item">
+                <a href="{{ url_for('admin_categories') }}"
+                    class="nav-item {% if request.endpoint == 'admin_categories' %}active{% endif %}">
                     <i class="ri-stack-line"></i> Categories
                 </a>
                 <a href="#" class="nav-item">
@@ -60,6 +65,7 @@
                     Settings
                 </a>
             </div>
+
         </div>
 
         <div class="admin-profile">

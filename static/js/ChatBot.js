@@ -2,9 +2,7 @@ const userInput = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 const chatDisplay = document.getElementById('chat-box');
 
-
 let activeSessionId = null;
-
 
 document.addEventListener('DOMContentLoaded', async () => {
     await createNewSession();
@@ -61,7 +59,6 @@ document.querySelectorAll('.history-item').forEach(item => {
             return;
         }
 
-       
         activeSessionId = sessionId;
 
         try {
@@ -70,7 +67,6 @@ document.querySelectorAll('.history-item').forEach(item => {
 
             chatDisplay.innerHTML = '';
 
-    
             data.history.forEach(msg => {
 
                 if (msg.sender === 'user' && msg.text === "") return;
@@ -187,6 +183,24 @@ function renderTicketForm(formData, isSubmitted = false) {
         `;
     }
 
+    // --- DYNAMIC CATEGORY LOGIC ADDED HERE ---
+    let categoryOptions = '';
+    if (window.ticketCategories && window.ticketCategories.length > 0) {
+        window.ticketCategories.forEach(cat => {
+            let selected = (formData.category && formData.category.toLowerCase() === cat.toLowerCase()) ? 'selected' : '';
+            categoryOptions += `<option value="${cat}" ${selected}>${cat}</option>`;
+        });
+    } else {
+        // Fallback options
+        categoryOptions = `
+            <option value="Network" ${formData.category === 'Network' ? 'selected' : ''}>Network</option>
+            <option value="Hardware" ${formData.category === 'Hardware' ? 'selected' : ''}>Hardware</option>
+            <option value="Software" ${formData.category === 'Software' ? 'selected' : ''}>Software</option>
+            <option value="Access" ${formData.category === 'Access' ? 'selected' : ''}>Access</option>
+        `;
+    }
+    // -----------------------------------------
+
     formContainer.innerHTML = `
         <div class="gui-header">
             <div class="gui-header-left">
@@ -207,10 +221,7 @@ function renderTicketForm(formData, isSubmitted = false) {
                 <div class="gui-field">
                     <label>Category</label>
                     <select id="gui-category" ${disabledAttr}>
-                        <option value="Network" ${formData.category === 'Network' ? 'selected' : ''}>Network</option>
-                        <option value="Hardware" ${formData.category === 'Hardware' ? 'selected' : ''}>Hardware</option>
-                        <option value="Software" ${formData.category === 'Software' ? 'selected' : ''}>Software</option>
-                        <option value="Access" ${formData.category === 'Access' ? 'selected' : ''}>Access</option>
+                        ${categoryOptions}
                     </select>
                 </div>
                 <div class="gui-field">
@@ -245,7 +256,6 @@ async function submitFinalTicket() {
         description: document.getElementById('gui-desc').value,
         priority: document.getElementById('gui-priority').value,
         category: document.getElementById('gui-category').value,
-        // MODIFICATION: Pass the active ID along with the ticket payload
         session_id: activeSessionId 
     };
 

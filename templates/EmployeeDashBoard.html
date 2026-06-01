@@ -54,27 +54,35 @@
         
         <div class="filter-section">
             <div class="filter-group">
-                <select>
-                    <option>Status: All</option>
-                    <option>Open</option>
-                    <option>In Progress</option>
-                    <option>Resolved</option>
+                <select id="status-filter">
+                    <option value="All">Status: All</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
                 </select>
             </div>
             <div class="filter-group">
-                <select>
-                    <option>Category: All</option>
-                    <option>Access</option>
-                    <option>Software</option>
-                    <option>Hardware</option>
-                    <option>Network</option>
+                <select id="category-filter">
+                    <option value="All">Category: All</option>
+                    {% for cat in db_categories %}
+                    <option value="{{ cat.name }}">{{ cat.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="filter-group">
-                <select>
-                    <option>Date: This week</option>
-                    <option>This Month</option>
-                    <option>Within 3 months</option>
+                <select id="priority-filter">
+                    <option value="All">Priority: All</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select id="date-filter">
+                    <option value="All">Date: All</option>
+                    <option value="This week">This week</option>
+                    <option value="This Month">This Month</option>
+                    <option value="Within 3 months">Within 3 months</option>
                 </select>
             </div>
         </div>
@@ -94,14 +102,20 @@
                 <tbody class="table-body">
                   
                     {% for ticket in tickets | reverse %}
-                    <tr class="ticket-row">
+                    <tr class="ticket-row" 
+                        data-status="{{ ticket.status }}" 
+                        data-category="{{ ticket.category }}" 
+                        data-priority="{{ ticket.priority }}" 
+                        data-date="{{ ticket.created_at.isoformat() if ticket.created_at else '' }}">
                         <td class="t-id">T-{{ "%03d" | format(ticket.id) }}</td>
                         <td class="t-title-col">
                             <div class="t-title">{{ ticket.title }}</div>
                             <div class="t-desc">{{ ticket.description }}</div>
                         </td>
                         <td>
-                            <span class="cat-badge cat-{{ ticket.category|lower|replace(' ', '-') }}">
+                            {% set cat_key = ticket.category|lower %}
+                            {% set cat_color = category_colors.get(cat_key, '#4b5563') %}
+                            <span class="cat-badge" style="color: {{ cat_color }}; background-color: {{ cat_color }}26;">
                                 {{ ticket.category }}
                             </span>
                         </td>
