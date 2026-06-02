@@ -81,18 +81,14 @@
                         </div>
                     </div>
                     <div class="donut-legend">
-                        <div class="leg-item"><span class="dot dot-blue"></span><span class="leg-name">Network</span>
-                            <span class="leg-val">{{ chart_data.catCounts['Network'] }}</span> <span class="leg-pct">{{
-                                chart_data.catPct['Network'] }}%</span></div>
-                        <div class="leg-item"><span class="dot dot-orange"></span><span class="leg-name">Access</span>
-                            <span class="leg-val">{{ chart_data.catCounts['Access'] }}</span> <span class="leg-pct">{{
-                                chart_data.catPct['Access'] }}%</span></div>
-                        <div class="leg-item"><span class="dot dot-red"></span><span class="leg-name">Software</span>
-                            <span class="leg-val">{{ chart_data.catCounts['Software'] }}</span> <span class="leg-pct">{{
-                                chart_data.catPct['Software'] }}%</span></div>
-                        <div class="leg-item"><span class="dot dot-green"></span><span class="leg-name">Hardware</span>
-                            <span class="leg-val">{{ chart_data.catCounts['Hardware'] }}</span> <span class="leg-pct">{{
-                                chart_data.catPct['Hardware'] }}%</span></div>
+                        {% for cat in dynamic_cats %}
+                        <div class="leg-item">
+                            <span class="dot" style="background-color: {{ cat.color }};"></span>
+                            <span class="leg-name">{{ cat.name }}</span>
+                            <span class="leg-val">{{ cat.count }}</span> 
+                            <span class="leg-pct">{{ cat.pct }}%</span>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

@@ -11,7 +11,6 @@
     color: #111827;
 }
 
-
 .dash-header {
     display: flex;
     justify-content: space-between;
@@ -53,7 +52,6 @@
     align-items: start;
 }
 
-
 .panel {
     background-color: #ffffff;
     border: 1px solid #e5e7eb;
@@ -85,7 +83,6 @@
     font-size: 0.8rem;
     color: #6b7280;
 }
-
 
 .category-item {
     display: flex;
@@ -148,7 +145,6 @@
     background: #f3f4f6;
 }
 
-
 .panel-body {
     padding: 20px;
 }
@@ -185,6 +181,7 @@
     display: flex;
     gap: 12px;
     margin-top: 8px;
+    flex-wrap: wrap; 
 }
 
 .color-swatch {
@@ -201,11 +198,9 @@
     display: none; 
 }
 
-
 .color-swatch.selected {
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #111827;
 }
-
 
 .color-swatch.disabled {
     opacity: 0.3;
@@ -213,13 +208,11 @@
     pointer-events: none;
 }
 
-
 .form-actions {
     display: flex;
     gap: 12px;
     align-items: center;
 }
-
 
 .btn-submit {
     background-color: #111827;
@@ -239,7 +232,6 @@
 .btn-submit:hover {
     background-color: #374151;
 }
-
 
 .btn-cancel {
     background-color: transparent;

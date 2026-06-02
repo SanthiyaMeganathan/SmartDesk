@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
     
-
     const barCtx = document.getElementById('barChart').getContext('2d');
     new Chart(barCtx, {
         type: 'bar',
@@ -63,10 +62,13 @@ document.addEventListener("DOMContentLoaded", function () {
     new Chart(donutCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Network', 'Access', 'Software', 'Hardware'],
+            // DYNAMIC LABELS
+            labels: chartData.donutLabels,
             datasets: [{
+                // DYNAMIC DATA
                 data: chartData.donutData, 
-                backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444', '#10b981'],
+                // DYNAMIC COLORS
+                backgroundColor: chartData.donutColors,
                 borderWidth: 0,
                 cutout: '75%' 
             }]

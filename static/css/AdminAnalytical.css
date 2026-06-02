@@ -246,11 +246,6 @@
     margin-right: 10px; 
 }
 
-.dot-blue { background: #3b82f6; }
-.dot-orange { background: #f59e0b; }
-.dot-red { background: #ef4444; }
-.dot-green { background: #10b981; }
-
 .leg-name {
     flex: 1; 
 }

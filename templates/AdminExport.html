@@ -6,7 +6,6 @@
 
 {% block content %}
 <div class="dashboard-wrapper">
-
     <div class="dash-header">
         <div class="dash-title">
             <h2>Export</h2>
@@ -15,14 +14,11 @@
     </div>
 
     <div class="main-content-container">
-
         <div class="export-sidebar">
-
             <div class="filter-section">
                 <div class="filter-heading">Date range</div>
                 <div class="date-range-inputs">
-                    <input type="date" id="start-date" class="date-input"
-                        value="{{ request.args.get('start_date', '') }}">
+                    <input type="date" id="start-date" class="date-input" value="{{ request.args.get('start_date', '') }}">
                     <input type="date" id="end-date" class="date-input" value="{{ request.args.get('end_date') }}">
                 </div>
             </div>
@@ -31,26 +27,22 @@
                 <div class="filter-heading">Filter by status</div>
                 <div class="checkbox-group">
                     <label class="custom-checkbox">
-                        <input type="checkbox" id="status-all" class="status-cb" {% if not
-                            request.args.getlist('status') %}checked{% endif %}>
+                        <input type="checkbox" id="status-all" class="status-cb" {% if not request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">All tickets</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Open" class="status-cb" {% if 'Open' in
-                            request.args.getlist('status') %}checked{% endif %}>
+                        <input type="checkbox" value="Open" class="status-cb" {% if 'Open' in request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">Open</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="In Progress" class="status-cb" {% if 'In Progress' in
-                            request.args.getlist('status') %}checked{% endif %}>
+                        <input type="checkbox" value="In Progress" class="status-cb" {% if 'In Progress' in request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">In Progress</span>
                     </label>
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Resolved" class="status-cb" {% if 'Resolved' in
-                            request.args.getlist('status') %}checked{% endif %}>
+                        <input type="checkbox" value="Resolved" class="status-cb" {% if 'Resolved' in request.args.getlist('status') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">Resolved</span>
                     </label>
@@ -61,43 +53,24 @@
                 <div class="filter-heading">Filter by category</div>
                 <div class="checkbox-group">
                     <label class="custom-checkbox">
-                        <input type="checkbox" id="cat-all" class="cat-cb" {% if not request.args.getlist('category')
-                            %}checked{% endif %}>
+                        <input type="checkbox" id="cat-all" class="cat-cb" {% if not request.args.getlist('category') %}checked{% endif %}>
                         <span class="checkmark"></span>
                         <span class="cb-label">All categories</span>
                     </label>
+                    {% for cat in db_categories %}
                     <label class="custom-checkbox">
-                        <input type="checkbox" value="Network" class="cat-cb" {% if 'Network' in
-                            request.args.getlist('category') %}checked{% endif %}>
+                        <input type="checkbox" value="{{ cat.name }}" class="cat-cb" {% if cat.name in request.args.getlist('category') %}checked{% endif %}>
                         <span class="checkmark"></span>
-                        <span class="cb-label">Network</span>
+                        <span class="cb-label">{{ cat.name }}</span>
                     </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" value="Hardware" class="cat-cb" {% if 'Hardware' in
-                            request.args.getlist('category') %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        <span class="cb-label">Hardware</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" value="Software" class="cat-cb" {% if 'Software' in
-                            request.args.getlist('category') %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        <span class="cb-label">Software</span>
-                    </label>
-                    <label class="custom-checkbox">
-                        <input type="checkbox" value="Access" class="cat-cb" {% if 'Access' in
-                            request.args.getlist('category') %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                        <span class="cb-label">Access</span>
-                    </label>
+                    {% endfor %}
                 </div>
             </div>
 
             <div class="filter-section">
                 <div class="filter-heading">Export format</div>
                 <div class="format-toggle-group">
-                    <button class="format-btn active" id="btn-excel"><i class="ri-file-excel-2-fill"></i> Excel
-                        (.xlsx)</button>
+                    <button class="format-btn active" id="btn-excel"><i class="ri-file-excel-2-fill"></i> Excel (.xlsx)</button>
                     <button class="format-btn" id="btn-csv"><i class="ri-file-text-line"></i> CSV (.csv)</button>
                 </div>
             </div>
@@ -117,7 +90,6 @@
                 </div>
             </div>
 
-
             <div class="table-container export-table-container">
                 <table class="emp-ticket-table export-ticket-table">
                     <thead>
@@ -131,60 +103,49 @@
                             <th width="10%">Created</th>
                         </tr>
                     </thead>
-
                     <tbody class="table-body">
-
                         {% for ticket in preview_tickets %}
                         <tr class="ticket-row">
-
                             <td class="t-id">
                                 T-{{ "%03d" | format(ticket.id) }}
                             </td>
-
                             <td class="t-title-col">
                                 <div class="t-title">
                                     {{ ticket.title }}
                                 </div>
                             </td>
-
                             <td class="t-email">
                                 {{ ticket.email.split('@')[0] }}
                             </td>
-
                             <td>
-                                <span class="cat-badge cat-{{ ticket.category|lower|replace(' ', '-') }}">
+                                {% set cat_color = category_colors.get(ticket.category, '#6b7280') %}
+                                <span class="cat-badge" style="color: {{ cat_color }}; background-color: {{ cat_color }}1A;">
                                     {{ ticket.category }}
                                 </span>
                             </td>
-
                             <td>
                                 {% if ticket.priority|lower == 'high' %}
                                 <span class="priority p-high">
                                     <i class="ri-arrow-up-line"></i> High
                                 </span>
-
                                 {% elif ticket.priority|lower == 'medium' %}
                                 <span class="priority p-med">
                                     <i class="ri-subtract-line"></i> Medium
                                 </span>
-
                                 {% else %}
                                 <span class="priority p-low">
                                     <i class="ri-arrow-down-line"></i> Low
                                 </span>
                                 {% endif %}
                             </td>
-
                             <td>
                                 <span class="status-badge-select s-{{ ticket.status|lower|replace(' ', '-') }}">
                                     {{ ticket.status }}
                                 </span>
                             </td>
-
                             <td class="t-date">
                                 {{ ticket.created_at.strftime('%d %b') }}
                             </td>
-
                         </tr>
                         {% endfor %}
 
@@ -195,21 +156,14 @@
                             </td>
                         </tr>
                         {% endif %}
-
                     </tbody>
                 </table>
             </div>
 
-
-       
             <div class="ep-footer">
-
                 Preview shows latest {{ [preview_tickets|length, 3] | min }} rows.
-
                 Full export will include all {{ filtered_total }} matching tickets.
-
             </div>
-          
         </div>
     </div>
 </div>

@@ -59,6 +59,11 @@ class Category(db.Model):
     description = db.Column(db.String(200), nullable=True)
     color = db.Column(db.String(20), nullable=False, unique=True)
 
+# NEW: The ledger for soft-deleted categories
+class DeletedCategory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+
 
 with app.app_context():
     db.create_all()
@@ -96,6 +101,15 @@ with app.app_context():
     db.session.commit()
     print("Database initialized successfully.")
     
+# HELPER FUNCTIONS TO FILTER OUT DELETED CATEGORIES
+def get_active_categories():
+    deleted_names = [d.name for d in DeletedCategory.query.all()]
+    return [cat for cat in Category.query.all() if cat.name not in deleted_names]
+
+def get_active_category_names():
+    deleted_names = [d.name for d in DeletedCategory.query.all()]
+    return [cat.name for cat in Category.query.all() if cat.name not in deleted_names]
+
 
 def search_knowledge_base(user_query):
     try:
@@ -177,7 +191,7 @@ def employee_dashboard():
     in_progress_count = sum(1 for ticket in my_tickets if ticket.status == 'In Progress')
     closed_count = sum(1 for ticket in my_tickets if ticket.status == 'Resolved')
 
-    db_categories = Category.query.all()
+    db_categories = get_active_categories()
     category_colors = {cat.name.lower(): cat.color for cat in db_categories}
 
     return render_template(
@@ -213,7 +227,7 @@ def render_chatbot():
         else:
             tickets_earlier.append(ticket)
 
-    db_categories = Category.query.all()
+    db_categories = get_active_categories()
 
     return render_template(
         'ChatBot.html', 
@@ -249,11 +263,14 @@ def admin_dashboard():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
     
+    active_cats = get_active_category_names()
+    base_query = Ticket.query.filter(Ticket.category.in_(active_cats))
+    
     status_filter = request.args.get('status')
     category_filter = request.args.get('category')
     priority_filter = request.args.get('priority')
     
-    query = Ticket.query
+    query = base_query
 
     if status_filter:
         query = query.filter(Ticket.status == status_filter)
@@ -264,34 +281,31 @@ def admin_dashboard():
         
     filtered_tickets = query.all()
     
-    global_total = Ticket.query.count()
-    global_open = Ticket.query.filter_by(status='Open').count()
-    global_progress = Ticket.query.filter_by(status='In Progress').count()
-    global_resolved = Ticket.query.filter_by(status='Resolved').count()
+    global_total = base_query.count()
+    global_open = base_query.filter(Ticket.status == 'Open').count()
+    global_progress = base_query.filter(Ticket.status == 'In Progress').count()
+    global_resolved = base_query.filter(Ticket.status == 'Resolved').count()
 
     seven_days_ago = datetime.now() - timedelta(days=7)
-    recent_raised_count = Ticket.query.filter(Ticket.created_at >= seven_days_ago).count()
+    recent_raised_count = base_query.filter(Ticket.created_at >= seven_days_ago).count()
   
     open_pct = round((global_open / global_total * 100), 1) if global_total > 0 else 0
     progress_pct = round((global_progress / global_total * 100), 1) if global_total > 0 else 0
 
-    categories_to_track = [
-        ('Network', 'network'),
-        ('Software', 'software'),
-        ('Hardware', 'hardware'),
-        ('Access', 'access')
-    ]
-      
-    cat_analytics = {}
-    for display_name, key in categories_to_track:
-        count = Ticket.query.filter_by(category=display_name).count()
+    db_categories = get_active_categories()
+    cat_analytics = []
+    
+    for cat in db_categories:
+        count = Ticket.query.filter_by(category=cat.name).count()
         percentage = (count / global_total * 100) if global_total > 0 else 0
-        cat_analytics[key] = {
+        cat_analytics.append({
+            'name': cat.name,
+            'color': cat.color,
             'count': count,
             'pct': round(percentage, 1)
-        }
+        })
    
-    resolved_list = Ticket.query.filter(Ticket.status == 'Resolved', Ticket.resolved_at != None).all()
+    resolved_list = base_query.filter(Ticket.status == 'Resolved', Ticket.resolved_at != None).all()
     if resolved_list:
         total_seconds = sum([(t.resolved_at - t.created_at).total_seconds() for t in resolved_list])
         avg_seconds = total_seconds / len(resolved_list)
@@ -300,7 +314,7 @@ def admin_dashboard():
     else:
         avg_res_time = "0.0 days"
 
-    top_five = Ticket.query.order_by(Ticket.created_at.desc()).limit(5).all()
+    top_five = base_query.order_by(Ticket.created_at.desc()).limit(5).all()
 
     return render_template (
         "AdminDashBoard.html",
@@ -312,7 +326,7 @@ def admin_dashboard():
         progress_pct=progress_pct,
         recent_count=recent_raised_count,
         avg_res_time=avg_res_time,
-        cat_stats=cat_analytics,
+        cat_stats=cat_analytics,  
         tickets=filtered_tickets,  
         recent_tickets=top_five   
     )
@@ -350,11 +364,13 @@ def admin_summary():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
 
+    active_cats = get_active_category_names()
+    base_query = Ticket.query.filter(Ticket.category.in_(active_cats))
    
-    open_count = Ticket.query.filter_by(status='Open').count()
-    progress_count = Ticket.query.filter_by(status='In Progress').count()
-    resolved_count = Ticket.query.filter_by(status='Resolved').count()
-    total_count = Ticket.query.count()
+    open_count = base_query.filter(Ticket.status == 'Open').count()
+    progress_count = base_query.filter(Ticket.status == 'In Progress').count()
+    resolved_count = base_query.filter(Ticket.status == 'Resolved').count()
+    total_count = base_query.count()
 
     return render_template(
         "AdminDashBoard.html", 
@@ -376,7 +392,7 @@ def chatbot_api():
 
     rag_context = search_knowledge_base(user_message)
 
-    active_categories = [cat.name for cat in Category.query.all()]
+    active_categories = get_active_category_names()
     categories_string = ", ".join(active_categories) if active_categories else "Network, Hardware, Software, Access"
     
     system_prompt = f"""
@@ -565,12 +581,13 @@ def myticketadminside():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
 
+    active_cats = get_active_category_names()
+    query = Ticket.query.filter(Ticket.category.in_(active_cats))
+
     status_filter = request.args.get('status', 'All')
     category_filter = request.args.get('category', 'All')
     priority_filter = request.args.get('priority', 'All')
     date_filter = request.args.get('date', 'All')
-
-    query = Ticket.query
 
     if status_filter != 'All':
         query = query.filter(Ticket.status == status_filter)
@@ -598,11 +615,11 @@ def myticketadminside():
             query = query.filter(Ticket.created_at >= start_date)
 
    
-    db_categories = Category.query.all()
+    db_categories = get_active_categories()
     category_colors = {cat.name.lower(): cat.color for cat in db_categories}
 
     filtered_tickets = query.order_by(Ticket.created_at.desc()).all()
-    total_tickets = Ticket.query.count()
+    total_tickets = Ticket.query.filter(Ticket.category.in_(active_cats)).count()
     
     return render_template(
         'MyTicketAdminSide.html', 
@@ -617,7 +634,8 @@ def admin_analytics():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
 
-    all_tickets = Ticket.query.all()
+    active_cats = get_active_category_names()
+    all_tickets = Ticket.query.filter(Ticket.category.in_(active_cats)).all()
     total_tickets = len(all_tickets)
 
    
@@ -685,14 +703,27 @@ def admin_analytics():
         peak_day_date = "N/A"
 
   
-    categories = ['Network', 'Access', 'Software', 'Hardware']
-    cat_counts = {c: 0 for c in categories}
-    for t in all_tickets:
-        if t.category in cat_counts:
-            cat_counts[t.category] += 1
+    # --- DYNAMIC CATEGORIES IN ANALYTICS ---
+    db_categories = get_active_categories()
+    dynamic_cats = []
+    donut_labels = []
+    donut_data = []
+    donut_colors = []
 
-    cat_pct = {c: round((count / total_tickets * 100)) if total_tickets > 0 else 0 for c, count in cat_counts.items()}
-    donut_data = [cat_counts['Network'], cat_counts['Access'], cat_counts['Software'], cat_counts['Hardware']]
+    for cat in db_categories:
+        count = Ticket.query.filter_by(category=cat.name).count()
+        pct = round((count / total_tickets * 100)) if total_tickets > 0 else 0
+        
+        dynamic_cats.append({
+            'name': cat.name,
+            'color': cat.color,
+            'count': count,
+            'pct': pct
+        })
+        donut_labels.append(cat.name)
+        donut_data.append(count)
+        donut_colors.append(cat.color)
+    # ---------------------------------------
 
     now = datetime.now()
 
@@ -740,11 +771,11 @@ def admin_analytics():
     chart_data = {
         'labels': weeks_labels,
         'barData': bar_data,
+        'donutLabels': donut_labels,
         'donutData': donut_data,
+        'donutColors': donut_colors,
         'lineOpen': line_open_data,
-        'lineResolved': line_resolved_data,
-        'catCounts': cat_counts,
-        'catPct': cat_pct
+        'lineResolved': line_resolved_data
     }
 
     return render_template(
@@ -757,92 +788,56 @@ def admin_analytics():
         ai_resolved_pct=ai_resolved_pct,
         peak_day=peak_day,
         peak_day_avg=peak_day_avg,
+        dynamic_cats=dynamic_cats, 
         chart_data=chart_data,
         peak_day_date=peak_day_date
     )   
 
 @app.route('/admin-export')
 def admin_export():
-
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
 
-
-    global_total = Ticket.query.count()
-
-
-    query = Ticket.query
+    active_cats = get_active_category_names()
+    query = Ticket.query.filter(Ticket.category.in_(active_cats))
+    global_total = query.count()
 
     statuses = request.args.getlist('status')
     categories = request.args.getlist('category')
     priorities = request.args.getlist('priority')
-
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
-
-
     if start_date_str and end_date_str:
-
         try:
-
-            start_date = datetime.strptime(
-                start_date_str,
-                '%Y-%m-%d'
-            )
-
-            end_date = datetime.strptime(
-                end_date_str,
-                '%Y-%m-%d'
-            ) + timedelta(days=1, seconds=-1)
-
-            query = query.filter(
-                Ticket.created_at >= start_date,
-                Ticket.created_at <= end_date
-            )
-
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1, seconds=-1)
+            query = query.filter(Ticket.created_at >= start_date, Ticket.created_at <= end_date)
         except ValueError:
             pass
 
-
-
     if statuses and 'All' not in statuses:
-
-        query = query.filter(
-            Ticket.status.in_(statuses)
-        )
-
-
+        query = query.filter(Ticket.status.in_(statuses))
 
     if categories and 'All' not in categories:
-
-        query = query.filter(
-            Ticket.category.in_(categories)
-        )
-
-
+        query = query.filter(Ticket.category.in_(categories))
 
     if priorities and 'All' not in priorities:
-
-        query = query.filter(
-            Ticket.priority.in_(priorities)
-        )
-
-
+        query = query.filter(Ticket.priority.in_(priorities))
 
     filtered_total = query.count()
+    preview_tickets = query.order_by(Ticket.created_at.desc()).limit(3).all()
 
-    preview_tickets = query.order_by(
-        Ticket.created_at.desc()
-    ).limit(3).all()
-
+    db_categories = get_active_categories()
+    category_colors = {cat.name: cat.color for cat in db_categories}
 
     return render_template(
-
         'AdminExport.html',
         total=global_total,
         filtered_total=filtered_total,
-        preview_tickets=preview_tickets
+        preview_tickets=preview_tickets,
+        db_categories=db_categories,
+        category_colors=category_colors
     )
     
 @app.route('/download-export')
@@ -860,7 +855,8 @@ def download_export():
 
     export_format = request.args.get('format', 'excel')
 
-    query = Ticket.query
+    active_cats = get_active_category_names()
+    query = Ticket.query.filter(Ticket.category.in_(active_cats))
 
     try:
 
@@ -1020,8 +1016,7 @@ def admin_categories():
     if session.get('role') != 'admin':
         return redirect(url_for('admin_login'))
     
-
-    db_categories = Category.query.all()
+    db_categories = get_active_categories()
     category_data = []
     used_colors = []
 
@@ -1060,10 +1055,30 @@ def add_category():
     if not cat_name or not color:
         return jsonify({"status": "error", "message": "Name and color are required."}), 400
 
-    if Category.query.filter_by(name=cat_name).first():
+    existing_cat = Category.query.filter_by(name=cat_name).first()
+    
+    if existing_cat:
+        # Check if it was previously soft-deleted
+        hidden_cat = DeletedCategory.query.filter_by(name=cat_name).first()
+        if hidden_cat:
+            # Prevent color clash with currently active categories before restoring
+            active_cats = get_active_categories()
+            if any(c.color == color and c.id != existing_cat.id for c in active_cats):
+                return jsonify({"status": "error", "message": "This color is already in use by an active category."}), 400
+                
+            # Restore the category by removing it from the hidden ledger
+            db.session.delete(hidden_cat)
+            existing_cat.description = desc
+            existing_cat.color = color
+            db.session.commit()
+            return jsonify({"status": "success", "message": "Category restored successfully!"})
+            
         return jsonify({"status": "error", "message": "Category name already exists."}), 400
-    if Category.query.filter_by(color=color).first():
-        return jsonify({"status": "error", "message": "This color is already in use."}), 400
+        
+    # Make sure color isn't used by an active category
+    active_cats = get_active_categories()
+    if any(c.color == color for c in active_cats):
+        return jsonify({"status": "error", "message": "This color is already in use by an active category."}), 400
 
     new_cat = Category(name=cat_name, description=desc, color=color)
     db.session.add(new_cat)
@@ -1085,10 +1100,12 @@ def edit_category(cat_id):
     if not new_name or not new_color:
         return jsonify({"status": "error", "message": "Name and color are required."}), 400
 
-    if Category.query.filter(Category.name == new_name, Category.id != cat_id).first():
+    active_cats = get_active_categories()
+    
+    if any(c.name == new_name and c.id != cat_id for c in active_cats):
         return jsonify({"status": "error", "message": "Category name already exists."}), 400
-    if Category.query.filter(Category.color == new_color, Category.id != cat_id).first():
-        return jsonify({"status": "error", "message": "This color is already in use."}), 400
+    if any(c.color == new_color and c.id != cat_id for c in active_cats):
+        return jsonify({"status": "error", "message": "This color is already in use by an active category."}), 400
 
     if category.name != new_name:
         Ticket.query.filter_by(category=category.name).update({'category': new_name})
@@ -1107,7 +1124,11 @@ def delete_category(cat_id):
 
     category = Category.query.get_or_404(cat_id)
 
-    db.session.delete(category)
+    # SOFT DELETE: Add the category name to the DeletedCategory ledger
+    if not DeletedCategory.query.filter_by(name=category.name).first():
+        hidden_record = DeletedCategory(name=category.name)
+        db.session.add(hidden_record)
+        
     db.session.commit()
 
     return jsonify({"status": "success", "message": "Category deleted!"})

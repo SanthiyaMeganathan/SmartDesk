@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    resetForm(); // Ensure clean state on load
+    resetForm(); 
 });
 
 // Handle clicking a color swatch
@@ -7,7 +7,7 @@ document.querySelectorAll('.color-swatch').forEach(swatch => {
     swatch.addEventListener('click', function(e) {
         if(this.classList.contains('disabled')) {
             e.preventDefault();
-            return; // Do nothing if disabled
+            return; 
         }
         document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
         this.classList.add('selected');
@@ -30,7 +30,7 @@ function openEditMode(id, name, desc, color) {
         s.classList.remove('selected');
         if(s.classList.contains('backend-disabled')) {
             s.classList.add('disabled');
-            s.querySelector('input').disabled = true;
+            if (s.querySelector('input')) s.querySelector('input').disabled = true;
         }
     });
 
@@ -58,9 +58,9 @@ function resetForm() {
         s.classList.remove('selected');
         if(s.classList.contains('backend-disabled')) {
             s.classList.add('disabled');
-            s.querySelector('input').disabled = true;
+            if (s.querySelector('input')) s.querySelector('input').disabled = true;
         } else {
-            s.querySelector('input').disabled = false;
+            if (s.querySelector('input')) s.querySelector('input').disabled = false;
         }
     });
 
@@ -81,11 +81,15 @@ async function submitCategory() {
     const colorInput = form.querySelector('input[name="color"]:checked');
 
     if(!name) return alert("Please enter a category name.");
-    if(!colorInput) return alert("Please select an available color. If none are available, you've reached the limit!");
+    if(!colorInput || !colorInput.value) return alert("Please select an available color. If none are available, you've reached the limit!");
+
+    // Alert for modifying existing category
+    const isEdit = id ? true : false;
+    if (isEdit) {
+        if(!confirm(`Alert: You are about to modify the existing category "${name}". Continue?`)) return;
+    }
 
     const payload = { category_name: name, description: desc, color: colorInput.value };
-    
-    // Determine URL based on whether we are editing an existing ID or creating a new one
     const url = id ? `/edit-category/${id}` : '/add-category';
 
     try {
@@ -98,6 +102,8 @@ async function submitCategory() {
         const data = await response.json();
         
         if(data.status === 'success') {
+            // Success Pop-up
+            alert(`Category "${name}" ${isEdit ? 'updated' : 'created'} successfully!`);
             window.location.reload(); 
         } else {
             alert("Error: " + data.message);
@@ -108,14 +114,21 @@ async function submitCategory() {
 }
 
 // Handle Delete
-async function deleteCategory(id) {
-    if(!confirm("Are you sure you want to delete this category?")) return;
+async function deleteCategory(id, ticketCount, catName) {
+    // Check if category has tickets
+    if (ticketCount > 0) {
+        if(!confirm(`ALERT: This category has ${ticketCount} ticket(s). Once deleted, it cannot be retrieved and will be deleted everywhere. Are you sure you want to proceed?`)) return;
+    } else {
+        if(!confirm(`Are you sure you want to delete the "${catName}" category?`)) return;
+    }
 
     try {
         const response = await fetch(`/delete-category/${id}`, { method: 'DELETE' });
         const data = await response.json();
         
         if(data.status === 'success') {
+            // Success Pop-up
+            alert(`Category "${catName}" deleted successfully!`);
             window.location.reload();
         } else {
             alert("Error: " + data.message);

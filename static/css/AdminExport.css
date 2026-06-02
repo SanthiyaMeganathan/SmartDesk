@@ -12,8 +12,6 @@
     color: #111827;
 }
 
-
-
 .dash-header {
     display: flex;
     justify-content: space-between;
@@ -41,15 +39,12 @@
     font-weight: 500;
 }
 
-
 .main-content-container {
     padding: 24px 32px;
     display: flex;
     gap: 20px;
     align-items: stretch;
 }
-
-
 
 .export-sidebar {
     width: 380px;
@@ -75,8 +70,6 @@
     margin-bottom: 10px;
 }
 
-
-
 .date-range-inputs {
     display: flex;
     gap: 12px;
@@ -99,7 +92,6 @@
 /* =========================
    CHECKBOXES
 ========================= */
-
 .checkbox-group {
     display: flex;
     flex-direction: column;
@@ -152,7 +144,6 @@
 /* =========================
    FORMAT BUTTONS
 ========================= */
-
 .format-toggle-group {
     display: flex;
     gap: 8px;
@@ -182,7 +173,6 @@
 /* =========================
    DOWNLOAD BUTTON
 ========================= */
-
 .download-btn {
     width: 100%;
     padding: 10px;
@@ -198,14 +188,12 @@
 /* =========================
    EXPORT PREVIEW BOX
 ========================= */
-
 .export-preview-box {
     flex: 1;
     background-color: white;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     overflow: hidden;
-    
 }
 
 .ep-header {
@@ -232,7 +220,6 @@
 /* =========================
    TABLE
 ========================= */
-
 .export-table-container {
     overflow: hidden;
 }
@@ -266,7 +253,6 @@
 /* =========================
    TEXT
 ========================= */
-
 .t-id {
     color: #9ca3af;
     font-size: 0.85rem;
@@ -274,8 +260,8 @@
 }
 
 .t-title-col {
-    width:240px;
-    max-width:240px;
+    width: 240px;
+    max-width: 240px;
 }
 
 .t-title {
@@ -287,6 +273,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .t-email {
     width: 65px;
     max-width: 65px;
@@ -305,7 +292,6 @@
 /* =========================
    PRIORITY
 ========================= */
-
 .priority {
     display: inline-flex;
     align-items: center;
@@ -329,34 +315,17 @@
 /* =========================
    CATEGORY BADGES
 ========================= */
-
 .cat-badge {
     padding: 4px 10px;
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 500;
-}
-
-.cat-software,
-.cat-access {
-    background-color: #f3f4f6;
-    color: #4b5563;
-}
-
-.cat-network {
-    background-color: #eff6ff;
-    color: #3b82f6;
-}
-
-.cat-hardware {
-    background-color: #fef3c7;
-    color: #d97706;
+    display: inline-block;
 }
 
 /* =========================
    STATUS
 ========================= */
-
 .status-badge-select {
     padding: 4px 10px;
     border-radius: 6px;
@@ -384,7 +353,6 @@
 /* =========================
    FOOTER
 ========================= */
-
 .ep-footer {
     padding: 16px 24px;
     font-size: 0.8rem;
@@ -393,42 +361,27 @@
 }
 
 /* Column Width Control */
-
 .export-ticket-table th:nth-child(1),
-.export-ticket-table td:nth-child(1) {
-    width: 8%;
-}
+.export-ticket-table td:nth-child(1) { width: 8%; }
 
 .export-ticket-table th:nth-child(2),
-.export-ticket-table td:nth-child(2) {
-    width: 30%;
-}
+.export-ticket-table td:nth-child(2) { width: 30%; }
 
 .export-ticket-table th:nth-child(3),
-.export-ticket-table td:nth-child(3) {
-    width: 14%;
-}
+.export-ticket-table td:nth-child(3) { width: 14%; }
 
 .export-ticket-table th:nth-child(4),
-.export-ticket-table td:nth-child(4) {
-    width: 12%;
-}
+.export-ticket-table td:nth-child(4) { width: 12%; }
 
 .export-ticket-table th:nth-child(5),
-.export-ticket-table td:nth-child(5) {
-    width: 10%;
-}
+.export-ticket-table td:nth-child(5) { width: 10%; }
 
 .export-ticket-table th:nth-child(6),
-.export-ticket-table td:nth-child(6) {
-    width: 12%;
-}
+.export-ticket-table td:nth-child(6) { width: 12%; }
 
 .export-ticket-table th:nth-child(7),
-.export-ticket-table td:nth-child(7) {
-    width: 11%;
-    white-space: nowrap;
-}
+.export-ticket-table td:nth-child(7) { width: 11%; white-space: nowrap; }
+
 .priority,
 .status-badge-select,
 .cat-badge {

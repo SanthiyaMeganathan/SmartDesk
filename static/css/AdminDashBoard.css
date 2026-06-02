@@ -331,11 +331,6 @@ body {
     width: var(--dynamic-width, 0%);
 }
 
-.bg-blue { background-color: #3b82f6; }
-.bg-orange { background-color: #d97706; }
-.bg-red { background-color: #ef4444; }
-.bg-green { background-color: #10b981; }
-
 .cat-count {
     width: 20px;
     text-align: right;
@@ -393,8 +388,6 @@ body {
 .s-open { background-color: #fee2e2; color: #ef4444; }
 .s-progress { background-color: #fef3c7; color: #d97706; }
 .s-resolved { background-color: #f0fdf4; color: #16a34a; }
-
-
 
 .my-tickets{
     color: #10b981;
